@@ -1,0 +1,29 @@
+# Repository Configuration for AutoRebase
+# Update these values with your actual repository URLs and tags
+
+repositories:
+  base:
+    url: "https://github.com/your-org/base-repo.git"
+    description: "Base repository with multiple versions"
+    tags:
+      base-0: "base-0"
+      base-1: "base-1"
+  
+  feature:
+    url: "https://github.com/your-org/feature-repo.git"
+    description: "Feature repository"
+    tags:
+      feature-0: "feature-0"
+
+# Data directory structure
+data:
+  base_dir: "data/repos"
+  base_0_dir: "data/repos/base-0"
+  base_1_dir: "data/repos/base-1"
+  feature_0_dir: "data/repos/feature-0"
+
+# Import settings
+import:
+  remove_existing: true
+  checkout_tags: true
+  verbose: true
