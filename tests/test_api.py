@@ -95,23 +95,7 @@ def run_manual_tests():
         print(f"Response: {json.dumps(response.json(), indent=2)}")
         print()
         
-        # Test autorebase endpoint
-        print("Testing autorebase/process endpoint...")
-        autorebase_data = {
-            "base_software_0": "a1b2c3d4e5f6",
-            "base_software_1": "b2c3d4e5f6g7",
-            "feature_software_0": "c3d4e5f6g7h8",
-            "base_repo_url": "https://github.com/microsoft/vscode.git",
-            "feature_repo_url": "https://github.com/microsoft/vscode.git",
-            "work_dir": "data/repos"
-        }
-        
-        response = requests.post(
-            f"{API_BASE}/autorebase/process",
-            json=autorebase_data
-        )
-        print(f"Status: {response.status_code}")
-        print(f"Response: {json.dumps(response.json(), indent=2)}")
+        print("Note: AutoRebase process now runs automatically after SHA validation")
         
     except requests.exceptions.ConnectionError:
         print("Error: Could not connect to the API.")

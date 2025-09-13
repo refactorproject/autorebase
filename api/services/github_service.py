@@ -1,6 +1,7 @@
 import httpx
 from typing import Dict, Any, Tuple
 from ..models.github_models import GitHubSHARequest, GitHubSHAResponse
+from ..autorebase.core import AutoRebase
 
 
 class GitHubService:
@@ -64,18 +65,31 @@ class GitHubService:
             ])
             
             if all_valid:
+                # SHA validation successful, now run autorebase process
+                autorebase = AutoRebase(work_dir="data/repos")
+                autorebase_results = await autorebase.process_repositories(
+                    base_repo_url=request.base_repo_url,
+                    feature_repo_url=request.feature_repo_url,
+                    base_0_sha=request.base_software_0,
+                    base_1_sha=request.base_software_1,
+                    feature_0_sha=request.feature_software_0
+                )
+                
                 return GitHubSHAResponse(
                     success=True,
-                    message="All GitHub SHAs validated successfully",
+                    message="All GitHub SHAs validated successfully and AutoRebase process completed",
                     base_software_0=request.base_software_0,
                     base_software_1=request.base_software_1,
                     feature_software_0=request.feature_software_0,
                     base_repo_url=request.base_repo_url,
                     feature_repo_url=request.feature_repo_url,
                     processing_details={
-                        "base_0_info": base_0_validation,
-                        "base_1_info": base_1_validation,
-                        "feature_0_info": feature_0_validation
+                        "validation_results": {
+                            "base_0_info": base_0_validation,
+                            "base_1_info": base_1_validation,
+                            "feature_0_info": feature_0_validation
+                        },
+                        "autorebase_results": autorebase_results
                     }
                 )
             else:

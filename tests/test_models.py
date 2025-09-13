@@ -15,8 +15,8 @@ class TestGitHubSHARequest:
         """Test valid request data"""
         data = {
             "base_software_0": "abc123def456",
-            "base_software_1": "def456ghi789",
-            "feature_software_0": "ghi789jkl012",
+            "base_software_1": "def456789abc",
+            "feature_software_0": "789abc123def",
             "base_repo_url": "https://github.com/microsoft/vscode.git",
             "feature_repo_url": "https://github.com/microsoft/vscode.git"
         }
@@ -24,8 +24,8 @@ class TestGitHubSHARequest:
         request = GitHubSHARequest(**data)
         
         assert request.base_software_0 == "abc123def456"
-        assert request.base_software_1 == "def456ghi789"
-        assert request.feature_software_0 == "ghi789jkl012"
+        assert request.base_software_1 == "def456789abc"
+        assert request.feature_software_0 == "789abc123def"
         assert request.base_repo_url == "https://github.com/microsoft/vscode.git"
         assert request.feature_repo_url == "https://github.com/microsoft/vscode.git"
     
@@ -33,8 +33,8 @@ class TestGitHubSHARequest:
         """Test invalid SHA format"""
         data = {
             "base_software_0": "invalid_sha",
-            "base_software_1": "def456ghi789",
-            "feature_software_0": "ghi789jkl012",
+            "base_software_1": "def456789abc",
+            "feature_software_0": "789abc123def",
             "base_repo_url": "https://github.com/microsoft/vscode.git",
             "feature_repo_url": "https://github.com/microsoft/vscode.git"
         }
@@ -42,14 +42,14 @@ class TestGitHubSHARequest:
         with pytest.raises(ValidationError) as exc_info:
             GitHubSHARequest(**data)
         
-        assert "string does not match regex" in str(exc_info.value)
+        assert "String should match pattern" in str(exc_info.value)
     
     def test_short_sha(self):
         """Test SHA that's too short"""
         data = {
             "base_software_0": "abc123",  # Too short
-            "base_software_1": "def456ghi789",
-            "feature_software_0": "ghi789jkl012",
+            "base_software_1": "def456789abc",
+            "feature_software_0": "789abc123def",
             "base_repo_url": "https://github.com/microsoft/vscode.git",
             "feature_repo_url": "https://github.com/microsoft/vscode.git"
         }
@@ -63,8 +63,8 @@ class TestGitHubSHARequest:
         """Test invalid repository URL"""
         data = {
             "base_software_0": "abc123def456",
-            "base_software_1": "def456ghi789",
-            "feature_software_0": "ghi789jkl012",
+            "base_software_1": "def456789abc",
+            "feature_software_0": "789abc123def",
             "base_repo_url": "not-a-github-url",
             "feature_repo_url": "https://github.com/microsoft/vscode.git"
         }
@@ -72,13 +72,13 @@ class TestGitHubSHARequest:
         with pytest.raises(ValidationError) as exc_info:
             GitHubSHARequest(**data)
         
-        assert "string does not match regex" in str(exc_info.value)
+        assert "String should match pattern" in str(exc_info.value)
     
     def test_missing_fields(self):
         """Test missing required fields"""
         data = {
             "base_software_0": "abc123def456",
-            "base_software_1": "def456ghi789",
+            "base_software_1": "def456789abc",
             # Missing feature_software_0
             "base_repo_url": "https://github.com/microsoft/vscode.git",
             "feature_repo_url": "https://github.com/microsoft/vscode.git"
@@ -87,7 +87,7 @@ class TestGitHubSHARequest:
         with pytest.raises(ValidationError) as exc_info:
             GitHubSHARequest(**data)
         
-        assert "field required" in str(exc_info.value)
+        assert "Field required" in str(exc_info.value)
 
 
 class TestGitHubSHAResponse:
@@ -99,8 +99,8 @@ class TestGitHubSHAResponse:
             "success": True,
             "message": "All GitHub SHAs validated successfully",
             "base_software_0": "abc123def456",
-            "base_software_1": "def456ghi789",
-            "feature_software_0": "ghi789jkl012",
+            "base_software_1": "def456789abc",
+            "feature_software_0": "789abc123def",
             "base_repo_url": "https://github.com/microsoft/vscode.git",
             "feature_repo_url": "https://github.com/microsoft/vscode.git",
             "processing_details": {
@@ -115,8 +115,8 @@ class TestGitHubSHAResponse:
         assert response.success is True
         assert response.message == "All GitHub SHAs validated successfully"
         assert response.base_software_0 == "abc123def456"
-        assert response.base_software_1 == "def456ghi789"
-        assert response.feature_software_0 == "ghi789jkl012"
+        assert response.base_software_1 == "def456789abc"
+        assert response.feature_software_0 == "789abc123def"
         assert response.base_repo_url == "https://github.com/microsoft/vscode.git"
         assert response.feature_repo_url == "https://github.com/microsoft/vscode.git"
         assert response.processing_details is not None
@@ -127,8 +127,8 @@ class TestGitHubSHAResponse:
             "success": False,
             "message": "Validation failed",
             "base_software_0": "abc123def456",
-            "base_software_1": "def456ghi789",
-            "feature_software_0": "ghi789jkl012",
+            "base_software_1": "def456789abc",
+            "feature_software_0": "789abc123def",
             "base_repo_url": "https://github.com/microsoft/vscode.git",
             "feature_repo_url": "https://github.com/microsoft/vscode.git"
         }

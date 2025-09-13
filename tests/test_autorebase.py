@@ -19,8 +19,8 @@ class TestAutoRebaseModels:
         """Test valid AutoRebase request"""
         data = {
             "base_software_0": "abc123def456",
-            "base_software_1": "def456ghi789",
-            "feature_software_0": "ghi789jkl012",
+            "base_software_1": "def456789abc",
+            "feature_software_0": "789abc123def",
             "base_repo_url": "https://github.com/microsoft/vscode.git",
             "feature_repo_url": "https://github.com/microsoft/vscode.git",
             "work_dir": "data/repos"
@@ -29,8 +29,8 @@ class TestAutoRebaseModels:
         request = AutoRebaseRequest(**data)
         
         assert request.base_software_0 == "abc123def456"
-        assert request.base_software_1 == "def456ghi789"
-        assert request.feature_software_0 == "ghi789jkl012"
+        assert request.base_software_1 == "def456789abc"
+        assert request.feature_software_0 == "789abc123def"
         assert request.base_repo_url == "https://github.com/microsoft/vscode.git"
         assert request.feature_repo_url == "https://github.com/microsoft/vscode.git"
         assert request.work_dir == "data/repos"
@@ -58,7 +58,7 @@ class TestAutoRebaseCore:
         result = await autorebase.run_autorebase()
         
         assert result["success"] is True
-        assert "placeholder" in result["message"]
+        assert "AutoRebase process completed successfully" in result["message"]
         assert "base_0_dir" in result["details"]
         assert "base_1_dir" in result["details"]
         assert "feature_0_dir" in result["details"]
@@ -77,8 +77,8 @@ class TestAutoRebaseService:
         """Create valid AutoRebase request"""
         return AutoRebaseRequest(
             base_software_0="abc123def456",
-            base_software_1="def456ghi789",
-            feature_software_0="ghi789jkl012",
+            base_software_1="def456789abc",
+            feature_software_0="789abc123def",
             base_repo_url="https://github.com/microsoft/vscode.git",
             feature_repo_url="https://github.com/microsoft/vscode.git",
             work_dir="test_repos"
@@ -118,71 +118,5 @@ class TestAutoRebaseService:
         assert result.autorebase_results is not None
 
 
-class TestAutoRebaseEndpoints:
-    """Test cases for AutoRebase API endpoints"""
-    
-    def test_autorebase_root_endpoint(self, client):
-        """Test AutoRebase root endpoint"""
-        response = client.get("/autorebase/")
-        
-        assert response.status_code == 200
-        data = response.json()
-        assert data["message"] == "AutoRebase Processing API"
-        assert "process" in data["endpoints"]
-        assert "health" in data["endpoints"]
-    
-    def test_autorebase_health_endpoint(self, client):
-        """Test AutoRebase health endpoint"""
-        response = client.get("/autorebase/health")
-        
-        assert response.status_code == 200
-        data = response.json()
-        assert data["status"] == "healthy"
-        assert data["service"] == "AutoRebase Processor"
-    
-    @patch('api.services.autorebase_service.AutoRebaseService.process_autorebase')
-    def test_autorebase_process_endpoint_success(self, mock_process, client):
-        """Test successful AutoRebase process endpoint"""
-        # Mock successful response
-        mock_response = AutoRebaseResponse(
-            success=True,
-            message="Complete process finished successfully",
-            base_software_0="abc123def456",
-            base_software_1="def456ghi789",
-            feature_software_0="ghi789jkl012",
-            base_repo_url="https://github.com/microsoft/vscode.git",
-            feature_repo_url="https://github.com/microsoft/vscode.git",
-            work_dir="data/repos"
-        )
-        mock_process.return_value = mock_response
-        
-        test_data = {
-            "base_software_0": "abc123def456",
-            "base_software_1": "def456ghi789",
-            "feature_software_0": "ghi789jkl012",
-            "base_repo_url": "https://github.com/microsoft/vscode.git",
-            "feature_repo_url": "https://github.com/microsoft/vscode.git"
-        }
-        
-        response = client.post("/autorebase/process", json=test_data)
-        
-        assert response.status_code == 200
-        data = response.json()
-        assert data["success"] is True
-        assert "Complete process finished successfully" in data["message"]
-    
-    def test_autorebase_process_endpoint_invalid_data(self, client):
-        """Test AutoRebase process endpoint with invalid data"""
-        invalid_data = {
-            "base_software_0": "invalid_sha",
-            "base_software_1": "def456ghi789",
-            "feature_software_0": "ghi789jkl012",
-            "base_repo_url": "not-a-github-url",
-            "feature_repo_url": "https://github.com/microsoft/vscode.git"
-        }
-        
-        response = client.post("/autorebase/process", json=invalid_data)
-        
-        assert response.status_code == 422  # Validation error
-        data = response.json()
-        assert "detail" in data
+# Note: AutoRebase endpoints are now integrated into the GitHub input endpoint
+# The autorebase process runs automatically after SHA validation

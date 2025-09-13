@@ -23,8 +23,8 @@ class TestGitHubService:
         """Create valid request"""
         return GitHubSHARequest(
             base_software_0="abc123def456",
-            base_software_1="def456ghi789",
-            feature_software_0="ghi789jkl012",
+            base_software_1="def456789abc",
+            feature_software_0="789abc123def",
             base_repo_url="https://github.com/microsoft/vscode.git",
             feature_repo_url="https://github.com/microsoft/vscode.git"
         )
@@ -46,7 +46,7 @@ class TestGitHubService:
         """Test successful SHA validation"""
         mock_response = AsyncMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {
+        mock_response.json = AsyncMock(return_value={
             "sha": "abc123def456",
             "commit": {
                 "message": "Test commit",
@@ -55,7 +55,7 @@ class TestGitHubService:
                     "date": "2024-01-01T00:00:00Z"
                 }
             }
-        }
+        })
         
         with patch('httpx.AsyncClient.get', return_value=mock_response):
             result = await service.validate_sha("abc123def456", "microsoft", "vscode")
@@ -88,10 +88,10 @@ class TestGitHubService:
     
     @pytest.mark.asyncio
     async def test_process_shas_all_valid(self, service, valid_request):
-        """Test processing all valid SHAs"""
+        """Test processing all valid SHAs with autorebase"""
         mock_response = AsyncMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {
+        mock_response.json = AsyncMock(return_value={
             "sha": "abc123def456",
             "commit": {
                 "message": "Test commit",
@@ -100,19 +100,40 @@ class TestGitHubService:
                     "date": "2024-01-01T00:00:00Z"
                 }
             }
+        })
+        
+        # Mock autorebase results
+        mock_autorebase_results = {
+            "success": True,
+            "message": "Complete process finished successfully",
+            "clone_results": {
+                "success": True,
+                "results": {
+                    "base_0": {"success": True, "message": "Cloned", "directory": "data/repos/base-0", "sha": "abc123def456"},
+                    "base_1": {"success": True, "message": "Cloned", "directory": "data/repos/base-1", "sha": "def456ghi789"},
+                    "feature_0": {"success": True, "message": "Cloned", "directory": "data/repos/feature-0", "sha": "ghi789jkl012"}
+                }
+            },
+            "autorebase_results": {
+                "success": True,
+                "message": "AutoRebase completed",
+                "details": {"status": "success"}
+            }
         }
         
-        with patch('httpx.AsyncClient.get', return_value=mock_response):
+        with patch('httpx.AsyncClient.get', return_value=mock_response), \
+             patch('api.autorebase.core.AutoRebase.process_repositories', return_value=mock_autorebase_results):
             result = await service.process_shas(valid_request)
         
         assert result.success is True
-        assert "All GitHub SHAs validated successfully" in result.message
+        assert "All GitHub SHAs validated successfully and AutoRebase process completed" in result.message
         assert result.base_software_0 == "abc123def456"
         assert result.base_software_1 == "def456ghi789"
         assert result.feature_software_0 == "ghi789jkl012"
         assert result.base_repo_url == "https://github.com/microsoft/vscode.git"
         assert result.feature_repo_url == "https://github.com/microsoft/vscode.git"
         assert result.processing_details is not None
+        assert "autorebase_results" in result.processing_details
     
     @pytest.mark.asyncio
     async def test_process_shas_some_invalid(self, service, valid_request):
@@ -120,7 +141,7 @@ class TestGitHubService:
         # Mock successful response for first two SHAs
         mock_success_response = AsyncMock()
         mock_success_response.status_code = 200
-        mock_success_response.json.return_value = {
+        mock_success_response.json = AsyncMock(return_value={
             "sha": "abc123def456",
             "commit": {
                 "message": "Test commit",
@@ -129,7 +150,7 @@ class TestGitHubService:
                     "date": "2024-01-01T00:00:00Z"
                 }
             }
-        }
+        })
         
         # Mock error response for third SHA
         mock_error_response = AsyncMock()

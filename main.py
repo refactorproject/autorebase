@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.routers.github_router import router as github_router
-from api.routers.autorebase_router import router as autorebase_router
 import uvicorn
 
 # Create FastAPI application
@@ -24,7 +23,6 @@ app.add_middleware(
 
 # Include routers
 app.include_router(github_router)
-app.include_router(autorebase_router)
 
 @app.get("/")
 async def root():
