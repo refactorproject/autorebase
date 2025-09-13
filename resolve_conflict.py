@@ -17,7 +17,7 @@ def main():
     parser = argparse.ArgumentParser(description="Resolve file conflicts using OpenAI")
     parser.add_argument("original_file", help="Path to the original file")
     parser.add_argument("rejection_file", help="Path to the .rej file")
-    parser.add_argument("requirement", help="Requirement text explaining what should be done")
+    parser.add_argument("requirements_file", help="Path to the requirements_map.yaml file")
     parser.add_argument("-o", "--output", help="Output file path (default: resolved_<original_file>)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     
@@ -33,7 +33,7 @@ def main():
     print("🔧 File Conflict Resolver")
     print(f"📁 Original file: {args.original_file}")
     print(f"🚫 Rejection file: {args.rejection_file}")
-    print(f"📋 Requirement: {args.requirement}")
+    print(f"📋 Requirements file: {args.requirements_file}")
     print(f"💾 Output file: {output_file}")
     print()
     
@@ -41,7 +41,7 @@ def main():
     result = resolve_file_conflict_with_openai(
         original_file_path=args.original_file,
         rejection_file_path=args.rejection_file,
-        requirement_text=args.requirement,
+        requirements_file=args.requirements_file,
         verbose=args.verbose
     )
     
@@ -51,6 +51,8 @@ def main():
     print(f"   Conflict Type: {result['conflict_type']}")
     print(f"   Explanation: {result['explanation']}")
     print(f"   Changes Applied: {result['changes_applied']}")
+    if result.get('requirement_used'):
+        print(f"   Requirement Used: {result['requirement_used']}")
     
     if result['success'] and result['resolved_content']:
         # Save the resolved content

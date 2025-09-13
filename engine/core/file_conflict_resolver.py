@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import os
 import re
+import yaml
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -17,19 +18,85 @@ except ImportError:
     pass  # python-dotenv not available, continue without it
 
 
+def load_requirements_map(requirements_file: str | Path) -> List[Dict[str, any]]:
+    """Load requirements map from YAML file."""
+    try:
+        with open(requirements_file, 'r') as f:
+            return yaml.safe_load(f) or []
+    except Exception as e:
+        print(f"Warning: Could not load requirements file {requirements_file}: {e}")
+        return []
+
+
+def find_requirement_for_file(file_path: str | Path, requirements_map: List[Dict[str, any]]) -> Optional[str]:
+    """Find the requirement text for a specific file path."""
+    file_path_str = str(file_path)
+    file_path_obj = Path(file_path_str)
+    
+    # Remove common suffixes like .orig, .rej, .patch for matching
+    base_file_path = file_path_str
+    for suffix in ['.orig', '.rej', '.patch']:
+        if base_file_path.endswith(suffix):
+            base_file_path = base_file_path[:-len(suffix)]
+            break
+    
+    # Try exact path match first (both absolute and relative)
+    for req in requirements_map:
+        req_path = req.get('path')
+        if req_path:
+            # Try exact match
+            if req_path == file_path_str:
+                return req.get('requirement')
+            # Try exact match with base path (without .orig/.rej)
+            if req_path == base_file_path:
+                return req.get('requirement')
+            # Try relative path match (e.g., "src/main.cpp" matches "/full/path/src/main.cpp")
+            if file_path_str.endswith(req_path):
+                return req.get('requirement')
+            if base_file_path.endswith(req_path):
+                return req.get('requirement')
+            # Try Path object comparison
+            if Path(req_path).name == file_path_obj.name:
+                return req.get('requirement')
+            # Try base name comparison
+            if Path(req_path).name == Path(base_file_path).name:
+                return req.get('requirement')
+    
+    # Try glob pattern match
+    for req in requirements_map:
+        path_glob = req.get('path_glob')
+        if path_glob:
+            import fnmatch
+            # Try matching against the full path
+            if fnmatch.fnmatch(file_path_str, path_glob):
+                return req.get('requirement')
+            # Try matching against base path
+            if fnmatch.fnmatch(base_file_path, path_glob):
+                return req.get('requirement')
+            # Try matching against just the filename
+            if fnmatch.fnmatch(file_path_obj.name, path_glob):
+                return req.get('requirement')
+            # Try matching against relative path components
+            for part in file_path_obj.parts:
+                if fnmatch.fnmatch(part, path_glob):
+                    return req.get('requirement')
+    
+    return None
+
+
 def resolve_file_conflict_with_openai(
     original_file_path: str | Path,
     rejection_file_path: str | Path,
-    requirement_text: str,
+    requirements_file: str | Path,
     verbose: bool = False
 ) -> Dict[str, any]:
     """
-    Resolve a single file conflict using OpenAI based on requirements.
+    Resolve a single file conflict using OpenAI based on requirements from YAML file.
     
     Args:
         original_file_path: Path to the original file (current state)
         rejection_file_path: Path to the .rej file (desired changes that failed)
-        requirement_text: The requirement that explains what should be done
+        requirements_file: Path to the requirements_map.yaml file
         verbose: Whether to print detailed information
         
     Returns:
@@ -39,9 +106,29 @@ def resolve_file_conflict_with_openai(
             "resolved_content": str | None,
             "explanation": str,
             "conflict_type": str,
-            "changes_applied": List[str]
+            "changes_applied": List[str],
+            "requirement_used": str | None
         }
     """
+    
+    # Load requirements map
+    requirements_map = load_requirements_map(requirements_file)
+    
+    # Find requirement for the original file
+    requirement_text = find_requirement_for_file(original_file_path, requirements_map)
+    
+    if not requirement_text:
+        return {
+            "success": False,
+            "resolved_content": None,
+            "explanation": f"No requirement found for file: {original_file_path}",
+            "conflict_type": "no_requirement",
+            "changes_applied": [],
+            "requirement_used": None
+        }
+    
+    if verbose:
+        print(f"📋 Found requirement: {requirement_text}")
     
     # Read the files
     try:
@@ -53,7 +140,8 @@ def resolve_file_conflict_with_openai(
             "resolved_content": None,
             "explanation": f"Failed to read files: {e}",
             "conflict_type": "file_read_error",
-            "changes_applied": []
+            "changes_applied": [],
+            "requirement_used": requirement_text
         }
     
     # Analyze the conflict
@@ -94,7 +182,8 @@ def resolve_file_conflict_with_openai(
                 "explanation": response["explanation"],
                 "conflict_type": conflict_analysis["type"],
                 "changes_applied": validation["changes_applied"],
-                "validation_score": validation["score"]
+                "validation_score": validation["score"],
+                "requirement_used": requirement_text
             }
         else:
             return {
@@ -102,7 +191,8 @@ def resolve_file_conflict_with_openai(
                 "resolved_content": None,
                 "explanation": f"OpenAI resolution failed: {response['error']}",
                 "conflict_type": conflict_analysis["type"],
-                "changes_applied": []
+                "changes_applied": [],
+                "requirement_used": requirement_text
             }
             
     except Exception as e:
@@ -111,7 +201,8 @@ def resolve_file_conflict_with_openai(
             "resolved_content": None,
             "explanation": f"OpenAI call failed: {e}",
             "conflict_type": conflict_analysis["type"],
-            "changes_applied": []
+            "changes_applied": [],
+            "requirement_used": requirement_text
         }
 
 
@@ -291,18 +382,18 @@ def test_file_conflict_resolver():
     # Test with the provided files
     original_file = "/Users/dhruvildarji/Documents/git/project/AutoRebase/artifacts/run20250913_134310/feature-5.1/src/main.cpp.orig"
     rejection_file = "/Users/dhruvildarji/Documents/git/project/AutoRebase/artifacts/run20250913_134310/feature-5.1/src/main.cpp.rej"
-    requirement = "Feature: While calling API we need to pass 200 as input"
+    requirements_file = "/Users/dhruvildarji/Documents/git/project/AutoRebase/data/sample/requirements_map.yaml"
     
     print("🧪 Testing File Conflict Resolver...")
     print(f"📁 Original file: {original_file}")
     print(f"🚫 Rejection file: {rejection_file}")
-    print(f"📋 Requirement: {requirement}")
+    print(f"📋 Requirements file: {requirements_file}")
     print()
     
     result = resolve_file_conflict_with_openai(
         original_file_path=original_file,
         rejection_file_path=rejection_file,
-        requirement_text=requirement,
+        requirements_file=requirements_file,
         verbose=True
     )
     
