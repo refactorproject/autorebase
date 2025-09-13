@@ -1,0 +1,8 @@
+{
+  "camera": {
+    "rvcs": {
+      "timeout": 100
+    }
+  }
+}
+

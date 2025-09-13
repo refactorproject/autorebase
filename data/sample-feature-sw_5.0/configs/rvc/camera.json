@@ -1,0 +1,9 @@
+{
+  "camera": {
+    "rvc": {
+      "timeout_ms": 800,
+      "exposure": "manual",
+      "log_level": "info"
+    }
+  }
+}

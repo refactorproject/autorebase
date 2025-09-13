@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# AutoRebase One-Play Script
-# This script runs the complete AutoRebase workflow in one go
-# Usage: ./scripts/run_auto_rebase.sh [workdir_name]
+# AI Direct Rebase Script
+# This script performs AI-based direct rebase without the traditional retarget step
+# Usage: ./scripts/ai_direct_rebase.sh [workdir_name]
 
 set -e  # Exit on any error
 
 # Configuration
-WORKDIR_NAME=${1:-"run$(date +%Y%m%d_%H%M%S)"}
+WORKDIR_NAME=${1:-"ai_rebase_$(date +%Y%m%d_%H%M%S)"}
 WORKDIR="artifacts/$WORKDIR_NAME"
 OLD_BASE="data/sample-base-sw_1.0"
 NEW_BASE="data/sample-base-sw_1.1"
@@ -65,7 +65,7 @@ run_cmd() {
 }
 
 # Main execution
-echo -e "${GREEN}🚀 Starting AutoRebase One-Play Workflow${NC}"
+echo -e "${GREEN}🚀 Starting AI Direct Rebase Workflow${NC}"
 echo "Workdir: $WORKDIR"
 echo "Old Base: $OLD_BASE"
 echo "New Base: $NEW_BASE"
@@ -79,7 +79,7 @@ check_command "python3"
 check_command "git"
 echo
 
-# Step 1: Initialize the run
+# Step 1: Initialize the run (to create workdir structure)
 run_cmd "python -m engine.cli.auto_rebase init --old-base $OLD_BASE --new-base $NEW_BASE --feature $FEATURE --req-map $REQ_MAP --workdir $WORKDIR --verbose" \
         "Initialize AutoRebase Run"
 
@@ -91,9 +91,13 @@ run_cmd "python -m engine.cli.auto_rebase extract-feature --out $WORKDIR/feature
 run_cmd "python -m engine.cli.auto_rebase extract-base --out $WORKDIR/base_patch --git-patch $WORKDIR/base.patch --patch-dir $WORKDIR/base_patches --verbose" \
         "Extract Base Patches"
 
-# Step 4: Retarget feature to new base
-run_cmd "python -m engine.cli.auto_rebase retarget --feature-patch $WORKDIR/feature_patch/feature_patch.json --base-patch $WORKDIR/base_patch/base_patch.json --new-base $NEW_BASE --out $WORKDIR/feature-5.1 --patch-dir $WORKDIR/feature_patches --verbose" \
-        "Retarget Feature to New Base"
+# Step 4: AI Direct Rebase - Apply feature patches directly to new base using AI
+print_step "AI Direct Rebase"
+echo "This step applies feature patches directly to the new base using AI conflict resolution"
+echo "No traditional retarget step needed!"
+
+run_cmd "python -m engine.cli.auto_rebase ai-rebase --feature-patches $WORKDIR/feature_patches --base-patches $WORKDIR/base_patches --new-base $NEW_BASE --req-map $REQ_MAP --out $WORKDIR/feature-5.1 --verbose" \
+        "AI Direct Rebase"
 
 # Step 5: Validate the results
 run_cmd "python -m engine.cli.auto_rebase validate --path $WORKDIR/feature-5.1 --report $WORKDIR/report.html --verbose" \
@@ -104,20 +108,26 @@ run_cmd "python -m engine.cli.auto_rebase finalize --path $WORKDIR/feature-5.1 -
         "Finalize with Git Tag"
 
 # Summary
-print_step "Workflow Summary"
+print_step "AI Direct Rebase Summary"
 echo "📁 Workdir: $WORKDIR"
 echo "📄 Reports:"
 echo "  - HTML Report: $WORKDIR/report.html"
 echo "  - JSON Report: $WORKDIR/report.json"
 echo "  - Trace: $WORKDIR/trace.json"
-echo "  - Retarget Results: $WORKDIR/feature-5.1/retarget_results.json"
+echo "  - AI Rebase Results: $WORKDIR/feature-5.1/ai_rebase_results.json"
 echo
 echo "📦 Generated Patches:"
 echo "  - Base patches: $WORKDIR/base_patches/"
 echo "  - Feature patches: $WORKDIR/feature_patches/"
 echo "  - Combined patches: $WORKDIR/base.patch, $WORKDIR/feature.patch"
 echo
-echo "🎯 Final Feature: $WORKDIR/feature-5.1/"
+echo "🎯 Final Feature (AI Rebased): $WORKDIR/feature-5.1/"
+echo
+echo "🤖 AI Resolution Features:"
+echo "  - Automatic conflict detection between feature and base patches"
+echo "  - OpenAI-based conflict resolution (if API key available)"
+echo "  - Heuristic fallback for common patterns"
+echo "  - Requirement-aware customization application"
 
 # Optional: Open the HTML report
 if command -v open &> /dev/null; then

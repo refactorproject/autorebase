@@ -10,19 +10,17 @@ from typing import Any
 from ..core import config as cfg
 from ..core import feature_extract, base_extract, retarget as rt, validate as val, report as rep
 from ..core.utils import setup_logging, write_json
-from ..adapters import c_cpp, json_cfg, yaml_cfg, dtsi, text_generic
 from ..core.vcs import commit_and_tag, git_diff_no_index, git_apply_reject, generate_per_file_patches, apply_patch_dir_with_reject
 from ..core.ai_resolve import resolve_rejects
+from ..core.ai_direct_rebase import ai_direct_rebase
 from ..core import utils as U
 
 
 def _tools_matrix() -> dict[str, Any]:
+    """Simplified tools matrix - all file types handled uniformly with git patches."""
     return {
-        "c_cpp": c_cpp.detect_env(),
-        "json": json_cfg.detect_env(),
-        "yaml": yaml_cfg.detect_env(),
-        "dtsi": dtsi.detect_env(),
-        "text": text_generic.detect_env(),
+        "git_patches": {"available": True, "description": "Git patch processing"},
+        "ai_resolution": {"available": True, "description": "AI-based conflict resolution"},
     }
 
 
@@ -69,6 +67,14 @@ def main() -> None:
     p_fin.add_argument("--tag", required=True)
     p_fin.add_argument("--trace", required=True)
     p_fin.add_argument("--verbose", action="store_true")
+
+    p_ai_rebase = sub.add_parser("ai-rebase")
+    p_ai_rebase.add_argument("--feature-patches", required=True, help="Directory containing feature patch files")
+    p_ai_rebase.add_argument("--base-patches", required=True, help="Directory containing base patch files")
+    p_ai_rebase.add_argument("--new-base", required=True, help="Path to new base directory")
+    p_ai_rebase.add_argument("--req-map", required=True, help="Path to requirements mapping file")
+    p_ai_rebase.add_argument("--out", required=True, help="Output directory for rebased feature")
+    p_ai_rebase.add_argument("--verbose", action="store_true")
 
     args = parser.parse_args()
     def find_manifest(start_path: Path) -> dict[str, Any]:
@@ -212,6 +218,33 @@ def main() -> None:
         }
         commit_and_tag(target, tag, trailers)
         print(str(trace_path))
+        return
+
+    if args.cmd == "ai-rebase":
+        feature_patches_dir = Path(args.feature_patches)
+        base_patches_dir = Path(args.base_patches)
+        new_base_root = Path(args.new_base)
+        req_map_path = Path(args.req_map)
+        output_dir = Path(args.out)
+        
+        # Perform AI-based direct rebase
+        results = ai_direct_rebase(
+            feature_patches_dir=feature_patches_dir,
+            base_patches_dir=base_patches_dir,
+            new_base_root=new_base_root,
+            requirements_map_path=req_map_path,
+            output_dir=output_dir
+        )
+        
+        # Print summary
+        summary = results["summary"]
+        print(f"AI Direct Rebase Results:")
+        print(f"  Total files processed: {summary['total_files']}")
+        print(f"  Successfully resolved: {summary['resolved']}")
+        print(f"  Errors: {summary['errors']}")
+        print(f"  Output directory: {output_dir}")
+        print(f"  Results file: {output_dir / 'ai_rebase_results.json'}")
+        
         return
 
 

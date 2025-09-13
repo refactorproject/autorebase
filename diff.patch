@@ -1,0 +1,11 @@
+diff --color data/sample/base-1.0/src/main.cpp data/sample/base-1.1/src/main.cpp
+3,4c3,4
+< void OldAPI(int v) {
+<   std::cout << "OldAPI: " << v << std::endl;
+---
+> void NewAPI(int v) {
+>   std::cout << "NewAPI: " << v << std::endl;
+8c8
+<   OldAPI(42);
+---
+>   NewAPI(42);

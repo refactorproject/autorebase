@@ -1,0 +1,4 @@
+telemetry:
+  enabled: true
+  interval_seconds: 60
+  max_payload_kb: 256

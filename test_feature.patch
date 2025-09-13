@@ -1,0 +1,13 @@
+--- data/sample/base-1.0/src/main.cpp	2025-09-13 12:12:50
++++ data/sample/feature-5.0/src/main.cpp	2025-09-13 12:13:08
+@@ -5,7 +5,9 @@
+ }
+ 
+ int main() {
+-  OldAPI(42);
++  // Feature customization: different value and extra log
++  std::cout << "Feature activated" << std::endl;
++  OldAPI(200);
+   return 0;
+ }
+ 

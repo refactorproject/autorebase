@@ -5,20 +5,16 @@ from typing import Literal, Protocol, TypedDict, Optional, Any
 
 
 class PatchUnit(TypedDict, total=False):
-    """A unit of change for a single file with optional semantic ops.
+    """A unit of change for a single file using git patches.
 
     - file_path: relative path of the file the patch applies to
-    - kind: language/adapter kind
-    - ops: adapter-specific operations; for text fallback, may contain a unified diff
-    - anchors: optional anchors/symbols to aid semantic relocation
+    - patch_content: git patch content for this file
     - req_ids: requirement IDs attached via traceability
     - notes: optional note
     """
 
     file_path: str
-    kind: Literal["c_cpp", "json", "yaml", "dtsi", "text"]
-    ops: list[dict]
-    anchors: Optional[dict]
+    patch_content: str
     req_ids: list[str]
     notes: Optional[str]
     requirements: list[str]
@@ -42,15 +38,4 @@ class ValidationIssue(TypedDict):
     message: str
 
 
-class Adapter(Protocol):
-    def detect_env(self) -> dict: ...
-
-    def extract_feature(self, old_base: Path, feature: Path) -> list[PatchUnit]: ...
-
-    def extract_base(self, old_base: Path, new_base: Path) -> dict: ...
-
-    def retarget(self, patch: PatchUnit, base_delta_map: dict, new_base_root: Path) -> PatchUnit | Conflict: ...
-
-    def apply(self, patch: PatchUnit, target_root: Path) -> ApplyResult: ...
-
-    def validate(self, target_root: Path) -> list[ValidationIssue]: ...
+# Adapter protocol removed - all file types handled uniformly with git patches

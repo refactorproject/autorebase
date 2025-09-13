@@ -1,0 +1,8 @@
+{
+  "camera": {
+    "rvc": {
+      "timeout_ms": 500,
+      "exposure": "auto"
+    }
+  }
+}
