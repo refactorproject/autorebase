@@ -136,6 +136,8 @@ python main.py
 python tests/test_api.py
 # or
 python run_tests.py manual
+# or for simple testing
+python run_tests.py simple
 ```
 
 #### **Test Runner Script**
@@ -145,6 +147,9 @@ python run_tests.py
 
 # Run manual tests (requires running server)
 python run_tests.py manual
+
+# Run simple manual tests (requires running server)
+python run_tests.py simple
 ```
 
 #### **Test Structure**

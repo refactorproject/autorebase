@@ -63,9 +63,31 @@ def run_manual_tests():
         print(f"❌ Error importing manual tests: {e}")
 
 
+def run_simple_tests():
+    """Run simple manual tests (convenience function)"""
+    print("Simple Test Runner")
+    print("=" * 50)
+    print("⚠️  Make sure the server is running: python main.py")
+    print()
+    
+    try:
+        from tests.test_api import run_simple_tests
+        run_simple_tests()
+    except ImportError as e:
+        print(f"❌ Error importing simple tests: {e}")
+
+
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "manual":
-        run_manual_tests()
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "manual":
+            run_manual_tests()
+        elif sys.argv[1] == "simple":
+            run_simple_tests()
+        else:
+            print("Usage: python run_tests.py [manual|simple]")
+            print("  manual: Run pytest-based manual tests")
+            print("  simple: Run simple manual tests")
+            print("  (no args): Run automated test suite")
     else:
         success = run_tests()
         sys.exit(0 if success else 1)

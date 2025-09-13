@@ -102,5 +102,15 @@ def run_manual_tests():
         print(f"Unexpected error: {e}")
 
 
+def run_simple_tests():
+    """Run simple manual tests (convenience function)"""
+    print("AutoRebase API Simple Test Suite")
+    print("=" * 50)
+    print("⚠️  Make sure the server is running: python main.py")
+    print()
+    
+    run_manual_tests()
+
+
 if __name__ == "__main__":
     run_manual_tests()
