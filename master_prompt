@@ -1,0 +1,513 @@
+MASTER SPEC PROMPT — BUILD “AUTO-REBASE” (END-TO-END)
+
+You are an expert software engineer. Generate a production-ready monorepo called auto-rebase that automates re-targeting feature customizations whenever a Base SW (e.g., DriveOS) updates.
+
+High-Level Goal
+
+Given:
+
+base-OLD/ (e.g., base-1.0)
+
+base-NEW/ (e.g., base-1.1)
+
+feature-OLD/ (e.g., feature-5.0 = base-OLD + customizations)
+
+Produce automatically:
+
+feature-NEW/ (e.g., feature-5.1 = base-NEW + re-applied customizations)
+
+Machine-readable feature customization patchset
+
+Machine-readable base delta patchset
+
+Human report (HTML) with merge outcomes, conflicts, requirement traceability, and validation results
+
+Git commits/tags with commit trailers for traceability
+
+Languages & Stack
+
+Core engine & CLI: Python 3.11
+
+Adapters / tooling bindings: Python subprocess + wrappers
+
+UI: Next.js 14 (TypeScript), TailwindCSS, minimal dashboard
+
+Auth/SSO: WorkOS (placeholder env vars, functions stubbed to compile)
+
+MCP server wrapper: Node.js TypeScript using Smithery-style template (expose CLI tools)
+
+Data store for runs: Convex (or fallback to local SQLite) – implement repository interface with two providers (Convex + SQLite)
+
+CI: GitHub Actions
+
+Package/deps: pin versions; provide requirements.txt and package.json
+
+Licensing: MIT
+
+External Tools (wrap with graceful fallbacks)
+
+git with rerere
+
+difftastic (syntax-aware diff)
+
+GumTree (AST map) – if not present, fallback to text heuristics but leave adapter scaffold
+
+clang-tidy/clang-apply-replacements (C/C++)
+
+coccinelle (semantic patches) – optional, guarded
+
+dtc (DTSI)
+
+jsonpatch (RFC-6902); jsonschema
+
+yq (YAML); yamale/pykwalify
+
+comby (structural find/replace)
+
+Every adapter must detect tool availability at runtime and degrade gracefully (log warning; switch to robust text merge).
+
+Monorepo Layout
+auto-rebase/
+  README.md
+  LICENSE
+  .gitignore
+  pyproject.toml
+  requirements.txt
+  scripts/
+    install_tools.sh
+    demo_seed.sh
+  engine/
+    __init__.py
+    cli/
+      auto_rebase.py
+    core/
+      config.py
+      diff_types.py
+      diff_graph.py
+      feature_extract.py
+      base_extract.py
+      retarget.py
+      validate.py
+      report.py
+      traceability.py
+      vcs.py
+      utils.py
+    adapters/
+      __init__.py
+      c_cpp.py
+      json_cfg.py
+      yaml_cfg.py
+      dtsi.py
+      text_generic.py
+      gumtree.py
+      difftastic.py
+      comby.py
+      schema.py
+    rules/
+      coccinelle/
+        symbol_rename.cocci
+      comby/
+        examples.rules
+      json/
+        examples.jsonpatch
+      yaml/
+        examples.yq
+    schemas/
+      requirements_map.schema.json
+      report.schema.json
+  data/
+    sample/base-1.0/
+    sample/base-1.1/
+    sample/feature-5.0/
+    sample/requirements_map.yaml
+  artifacts/ (gitignored)
+  tests/
+    test_end_to_end.py
+    test_adapters.py
+    test_traceability.py
+    fixtures/
+  mcp-server/
+    package.json
+    tsconfig.json
+    src/
+      index.ts
+      tools.ts
+      config.ts
+      process.ts
+      README.md
+  web/
+    package.json
+    next.config.js
+    src/
+      app/
+        page.tsx
+        api/
+          runs/route.ts
+      components/
+        UploadForm.tsx
+        RunTable.tsx
+        ReportViewer.tsx
+      lib/
+        auth.ts
+        api.ts
+        convexClient.ts
+    public/
+  server/
+    api/
+      main.py
+      models.py
+      storage/
+        base.py
+        sqlite_store.py
+        convex_store.py
+      routers/
+        runs.py
+        uploads.py
+      requirements.txt
+      README.md
+  .github/workflows/ci.yml
+
+Core Concepts
+
+ΔF (Feature Diff): changes from base-OLD → feature-OLD
+
+ΔB (Base Diff): changes from base-OLD → base-NEW
+
+ΔF' (Re-targeted): ΔF applied onto base-NEW
+
+Requirement mapping: file globs → requirement IDs, loaded from requirements_map.yaml
+
+CLI Commands (Implement now)
+
+auto-rebase (entrypoint engine/cli/auto_rebase.py):
+
+init --old-base PATH --new-base PATH --feature PATH --req-map PATH --workdir PATH
+
+Persists a run manifest (artifacts/run.json)
+
+extract-feature --out PATH
+
+Emits machine-readable ΔF: file list + patch units per adapter
+
+extract-base --out PATH
+
+Emits ΔB with change classification (moved/renamed/deleted/added/sig changes)
+
+retarget --feature-patch PATH --base-patch PATH --new-base PATH --out PATH
+
+3-way merge first (git); failed hunks → semantic relocate with adapters; log auto/manual decisions
+
+validate --path PATH --report PATH
+
+Build hooks (dummy; configurable script), schema checks, static checks; produce report.html + report.json
+
+finalize --path PATH --tag STRING --trace PATH
+
+Git commit + tag; add trailers:
+
+Req-Id: <comma-separated or multiple lines>
+Change-Type: FeatureCustomization
+Auto-Rebase-Run: <ISO-8601>
+
+
+All commands log to artifacts/logs/<run-id>.log and return non-zero on failure.
+
+Engine Details
+Adapters (engine/adapters/*.py)
+
+Each adapter must implement an interface:
+
+class PatchUnit(TypedDict):
+    file_path: str
+    kind: Literal["c_cpp","json","yaml","dtsi","text"]
+    ops: list[dict]           # adapter-specific ops (e.g., jsonpatch ops)
+    anchors: dict | None      # symbol/function/compatible anchors
+    req_ids: list[str]        # attached via traceability
+    notes: str | None
+
+class Adapter(Protocol):
+    def detect_env() -> dict: ...
+    def extract_feature(old_base: Path, feature: Path) -> list[PatchUnit]: ...
+    def extract_base(old_base: Path, new_base: Path) -> dict: ...
+    def retarget(patch: PatchUnit, base_delta_map: dict, new_base_root: Path) -> PatchUnit | Conflict: ...
+    def apply(patch: PatchUnit, target_root: Path) -> ApplyResult: ...
+    def validate(target_root: Path) -> list[ValidationIssue]: ...
+
+
+Implement for:
+
+c_cpp.py (clang-tidy fix-its, gumtree mapping, optional coccinelle)
+
+json_cfg.py (RFC-6902 ops + jsonschema validation)
+
+yaml_cfg.py (yq merges + yamale schema)
+
+dtsi.py (dtc compile; label/compatible anchors; overlay logic)
+
+text_generic.py (comby patterns; difftastic assist)
+
+Provide graceful fallback if external tool missing (textual smart diff with difflib + comby heuristics).
+
+Diff Graph (engine/core/diff_graph.py)
+
+Build a cross-file change graph:
+
+nodes: files/symbols/paths
+
+edges: moved/renamed/changed
+
+Export anchor maps (old→new locations) for adapters.
+
+Feature & Base Extraction
+
+feature_extract.py: compare trees; for each file, route to adapter; emit PatchUnit[]
+
+base_extract.py: compute ΔB; build rename/move maps; per-language classification
+
+Retargeting (engine/core/retarget.py)
+
+Phase 1: git merge-file / 3-way; enable git rerere
+
+Phase 2: For failed hunks, call adapter retarget() with ΔB maps
+
+Phase 3: Apply re-targeted patches into --out tree; produce per-file outcomes (applied/partial/conflict)
+
+Validation (engine/core/validate.py)
+
+Run:
+
+optional build script (configurable)
+
+adapters’ validate
+
+static checks (clang-tidy if C/C++; dtc if DTSI; jsonschema/yamale)
+
+Aggregate into ValidationSummary
+
+Traceability (engine/core/traceability.py)
+
+Load requirements_map.yaml with globs:
+
+- path_glob: "src/vision/**"
+  req_ids: ["AD-REQ-201","AD-REQ-318"]
+- path_glob: "configs/rvc/*.json"
+  req_ids: ["AD-REQ-411"]
+
+
+Attach IDs to PatchUnit during extraction
+
+Emit trace.json consumed by report & commit trailers
+
+Reporting (engine/core/report.py)
+
+Generate report.json and report.html (Jinja2 template):
+
+Summary % auto-merged / semantic / conflicts
+
+Table of files with badges
+
+Requirement IDs per change
+
+Validation results
+
+Tool availability matrix
+
+Validate report.json against schemas/report.schema.json
+
+VCS (engine/core/vcs.py)
+
+Utilities for git worktrees, rerere, tagging, trailers
+
+Server API (FastAPI)
+
+POST /runs → create run (stores metadata, paths; triggers background job via Python subprocess to call CLI)
+
+GET /runs → list runs
+
+GET /runs/{id} → status + links to artifacts (report, logs, produced tree tar)
+
+POST /uploads → accept zips of base-OLD, base-NEW, feature-OLD, requirements_map.yaml (store under /mnt/data/uploads/<run-id>/)
+
+Storage provider interface (server/api/storage/base.py) with two implementations:
+
+sqlite_store.py (default)
+
+convex_store.py (stubbed client; functions implemented but gated by CONVEX_URL presence)
+
+Provide server/api/requirements.txt separate (FastAPI, Uvicorn, Pydantic v2).
+
+MCP Server (Node/TypeScript)
+
+Expose tools that shell out to CLI:
+
+auto_rebase.init
+
+auto_rebase.extract_feature
+
+auto_rebase.extract_base
+
+auto_rebase.retarget
+
+auto_rebase.validate
+
+auto_rebase.finalize
+
+Each tool accepts JSON args → maps to CLI → streams logs back. Provide README to run:
+
+pnpm install
+pnpm build
+pnpm start
+
+Web UI (Next.js)
+
+Pages:
+
+/ dashboard:
+
+Upload three zips + requirements_map.yaml
+
+Button “Run Auto-Rebase”
+
+Table of runs with status, % auto-merged, link to report
+
+Report viewer (embed /artifacts/<id>/report.html)
+
+Auth:
+
+WorkOS placeholders with env vars WORKOS_CLIENT_ID, WORKOS_API_KEY, WORKOS_REDIRECT_URI; if absent, use a dev login page
+
+API routes call Server API (configurable SERVER_URL)
+
+CI (GitHub Actions)
+
+Python lint + tests
+
+Build MCP server
+
+Build Next.js
+
+Cache deps
+
+On success, upload artifacts/ from sample e2e run
+
+Provide .github/workflows/ci.yml that:
+
+installs toolchain (or mocks tools absent)
+
+runs unit tests
+
+runs scripts/demo_seed.sh to execute full flow on data/sample/* and produce a report artifact
+
+Sample Data
+
+Under data/sample/, include tiny illustrative trees:
+
+base-1.0/ small C++ file, a DTSI snippet, a JSON config, a YAML config
+
+feature-5.0/ modifies those
+
+base-1.1/ moves/renames one function, changes a JSON key path, relocates a DTSI node, adds a YAML field
+Include a minimal build script that always “passes” but echoes files (for pipeline demo).
+
+Developer Ergonomics
+
+scripts/install_tools.sh detects OS; installs or skips external tools with clear logs
+
+pyproject.toml for black/isort/ruff configs
+
+README.md with:
+
+quickstart (local)
+
+running the e2e demo
+
+environment variables (WorkOS/Convex)
+
+limitations & fallbacks
+
+how to add a new adapter
+
+Testing
+
+tests/test_end_to_end.py: runs init → extract-feature → extract-base → retarget → validate on sample data; asserts:
+
+feature-NEW exists
+
+report.json schema-valid
+
+At least one auto-merge and one semantic relocate event
+
+tests/test_adapters.py: per-adapter unit tests on tiny fixtures
+
+tests/test_traceability.py: verifies mapping globs to req IDs
+
+Non-Functional Requirements
+
+Deterministic outputs where possible
+
+Every public function must have type hints & docstrings
+
+Log levels: INFO default, DEBUG via --verbose
+
+No secrets in logs
+
+Robust error messages with remediation tips
+
+Deliverables
+
+All files laid out as above, complete and runnable
+
+Clean, pinned dependency files
+
+A working demo path:
+
+bash scripts/install_tools.sh      # optional
+python -m engine.cli.auto_rebase init --old-base data/sample/base-1.0 --new-base data/sample/base-1.1 --feature data/sample/feature-5.0 --req-map data/sample/requirements_map.yaml --workdir artifacts/run1
+python -m engine.cli.auto_rebase extract-feature --out artifacts/run1/feature_patch
+python -m engine.cli.auto_rebase extract-base --out artifacts/run1/base_patch
+python -m engine.cli.auto_rebase retarget --feature-patch artifacts/run1/feature_patch --base-patch artifacts/run1/base_patch --new-base data/sample/base-1.1 --out artifacts/run1/feature-5.1
+python -m engine.cli.auto_rebase validate --path artifacts/run1/feature-5.1 --report artifacts/run1/report.html
+python -m engine.cli.auto_rebase finalize --path artifacts/run1/feature-5.1 --tag v5.1 --trace artifacts/run1/trace.json
+
+
+GitHub Actions passes and uploads artifacts/run1/*
+
+Extra: Seed Rules Examples (embed as files)
+
+rules/coccinelle/symbol_rename.cocci
+
+@r@
+identifier old = "OldAPI", new = "NewAPI";
+@@
+- old(...)
++ new(...)
+
+
+rules/json/examples.jsonpatch
+
+[
+  {"op":"move","from":"/camera/rvc/timeout","path":"/camera/rvcs/timeout"}
+]
+
+
+rules/comby/examples.rules
+
+:[pre]OldName(:[args]) -> :[pre]NewName(:[args])
+
+Acceptance Criteria
+
+Running the demo produces:
+
+feature-5.1/ tree with applied changes
+
+report.html & report.json capturing auto vs semantic merges, conflicts, and validation
+
+trace.json listing requirement IDs per patch unit
+
+A Git tag v5.1 and commits with trailers
+
+Web UI can upload zips, launch a run, and display report (auth stub acceptable if WorkOS envs missing)
+
+MCP server exposes tools that invoke the CLI and return status
+
+Generate all code, configs, and docs now. If any external binary is absent in CI, mock behavior but keep interfaces intact and log warnings.

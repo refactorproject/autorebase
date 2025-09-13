@@ -1,0 +1,9 @@
+- path_glob: "src/**"
+  req_ids: ["AD-REQ-201", "AD-REQ-318"]
+- path_glob: "configs/*.json"
+  req_ids: ["AD-REQ-411"]
+- path_glob: "configs/*.yaml"
+  req_ids: ["AD-REQ-412"]
+- path_glob: "dts/**"
+  req_ids: ["AD-REQ-501"]
+

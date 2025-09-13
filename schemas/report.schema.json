@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["run_id", "summary", "files", "validation", "tools"],
+  "properties": {
+    "run_id": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["auto", "semantic", "conflicts"],
+      "properties": {
+        "auto": {"type": "number"},
+        "semantic": {"type": "number"},
+        "conflicts": {"type": "number"}
+      }
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["file", "status", "details", "req_ids"],
+        "properties": {
+          "file": {"type": "string"},
+          "status": {"type": "string"},
+          "details": {"type": "string"},
+          "req_ids": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "required": ["success", "issues"],
+      "properties": {
+        "success": {"type": "boolean"},
+        "issues": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["file_path", "level", "message"],
+            "properties": {
+              "file_path": {"type": "string"},
+              "level": {"type": "string"},
+              "message": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "tools": {"type": "object"}
+  }
+}
+

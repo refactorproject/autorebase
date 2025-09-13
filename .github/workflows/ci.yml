@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Python lint and tests
+        run: |
+          python -m pytest -q
+
+      - name: Build MCP server
+        continue-on-error: true
+        run: |
+          cd mcp-server
+          npm ci || npm install
+          npm run build
+
+      - name: Build Web UI
+        continue-on-error: true
+        run: |
+          cd web
+          npm ci || npm install
+          npm run build
+
+      - name: Demo seed
+        run: |
+          bash scripts/demo_seed.sh
+
+      - name: Upload demo artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-artifacts
+          path: artifacts/run1
+
