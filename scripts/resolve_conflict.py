@@ -7,8 +7,8 @@ import argparse
 import sys
 from pathlib import Path
 
-# Add the engine to the path
-sys.path.insert(0, str(Path(__file__).parent))
+# Add the project root to the path so we can import engine
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from engine.core.file_conflict_resolver import resolve_file_conflict_with_openai
 
