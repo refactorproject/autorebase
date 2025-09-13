@@ -33,33 +33,29 @@ def find_requirement_for_file(file_path: str | Path, requirements_map: List[Dict
     file_path_str = str(file_path)
     file_path_obj = Path(file_path_str)
     
-    # Remove common suffixes like .orig, .rej, .patch for matching
-    base_file_path = file_path_str
-    for suffix in ['.orig', '.rej', '.patch']:
-        if base_file_path.endswith(suffix):
-            base_file_path = base_file_path[:-len(suffix)]
+    # Remove .orig and .rej suffixes to get the base filename
+    base_filename = file_path_obj.name
+    for suffix in ['.orig', '.rej']:
+        if base_filename.endswith(suffix):
+            base_filename = base_filename[:-len(suffix)]
             break
     
-    # Try exact path match first (both absolute and relative)
+    # Get the relative path without .orig/.rej suffixes
+    # e.g., "/path/to/src/main.cpp.orig" -> "src/main.cpp"
+    base_file_path = str(file_path_obj.parent / base_filename)
+    
+    # Try exact path match first
     for req in requirements_map:
         req_path = req.get('path')
         if req_path:
-            # Try exact match
-            if req_path == file_path_str:
-                return req.get('requirement')
-            # Try exact match with base path (without .orig/.rej)
+            # Try exact match with the base path (without .orig/.rej)
             if req_path == base_file_path:
                 return req.get('requirement')
+            # Try matching just the filename (e.g., "main.cpp" matches "main.cpp")
+            if Path(req_path).name == base_filename:
+                return req.get('requirement')
             # Try relative path match (e.g., "src/main.cpp" matches "/full/path/src/main.cpp")
-            if file_path_str.endswith(req_path):
-                return req.get('requirement')
             if base_file_path.endswith(req_path):
-                return req.get('requirement')
-            # Try Path object comparison
-            if Path(req_path).name == file_path_obj.name:
-                return req.get('requirement')
-            # Try base name comparison
-            if Path(req_path).name == Path(base_file_path).name:
                 return req.get('requirement')
     
     # Try glob pattern match
@@ -67,16 +63,13 @@ def find_requirement_for_file(file_path: str | Path, requirements_map: List[Dict
         path_glob = req.get('path_glob')
         if path_glob:
             import fnmatch
-            # Try matching against the full path
-            if fnmatch.fnmatch(file_path_str, path_glob):
-                return req.get('requirement')
-            # Try matching against base path
+            # Try matching against the base path (without .orig/.rej)
             if fnmatch.fnmatch(base_file_path, path_glob):
                 return req.get('requirement')
-            # Try matching against just the filename
-            if fnmatch.fnmatch(file_path_obj.name, path_glob):
+            # Try matching against just the base filename
+            if fnmatch.fnmatch(base_filename, path_glob):
                 return req.get('requirement')
-            # Try matching against relative path components
+            # Try matching against path components
             for part in file_path_obj.parts:
                 if fnmatch.fnmatch(part, path_glob):
                     return req.get('requirement')
