@@ -20,7 +20,18 @@ def try_openai_resolve(rej_files: Sequence[Path], requirements: list[str]) -> di
         from openai import OpenAI  # type: ignore
     except Exception:
         return {}
-    client = OpenAI(api_key=api_key)
+    
+    # Handle different OpenAI library versions
+    try:
+        client = OpenAI(api_key=api_key)
+    except Exception as e:
+        # Fallback for older versions or different API
+        try:
+            import openai
+            openai.api_key = api_key
+            client = openai
+        except Exception:
+            return {}
     suggestions: dict[str, str] = {}
     prompt_parts = [
         "You are an expert software engineer helping with automated patch application.",
@@ -46,8 +57,24 @@ def try_openai_resolve(rej_files: Sequence[Path], requirements: list[str]) -> di
             "TASK: Apply the feature changes from the rejected patch to the current file, adapting for any API renames or changes."
         ])
         try:
-            resp = client.chat.completions.create(model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"), messages=[{"role": "user", "content": prompt}], temperature=0)
-            content = resp.choices[0].message.content or ""
+            # Handle different OpenAI library versions
+            if hasattr(client, 'chat') and hasattr(client.chat, 'completions'):
+                # New API (v1.0+)
+                resp = client.chat.completions.create(
+                    model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"), 
+                    messages=[{"role": "user", "content": prompt}], 
+                    temperature=0
+                )
+                content = resp.choices[0].message.content or ""
+            else:
+                # Old API (pre-v1.0)
+                resp = client.ChatCompletion.create(
+                    model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0
+                )
+                content = resp.choices[0].message.content or ""
+            
             if content.strip():
                 suggestions[str(target)] = content
         except Exception:

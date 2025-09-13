@@ -181,15 +181,33 @@ def ai_resolve_file_conflicts(
         if api_key:
             try:
                 from openai import OpenAI
-                client = OpenAI(api_key=api_key)
                 
-                response = client.chat.completions.create(
-                    model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-                    messages=[{"role": "user", "content": prompt}],
-                    temperature=0
-                )
+                # Handle different OpenAI library versions
+                try:
+                    client = OpenAI(api_key=api_key)
+                except Exception:
+                    # Fallback for older versions
+                    import openai
+                    openai.api_key = api_key
+                    client = openai
                 
-                resolved_content = response.choices[0].message.content or ""
+                # Handle different API versions
+                if hasattr(client, 'chat') and hasattr(client.chat, 'completions'):
+                    # New API (v1.0+)
+                    response = client.chat.completions.create(
+                        model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+                        messages=[{"role": "user", "content": prompt}],
+                        temperature=0
+                    )
+                    resolved_content = response.choices[0].message.content or ""
+                else:
+                    # Old API (pre-v1.0)
+                    response = client.ChatCompletion.create(
+                        model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+                        messages=[{"role": "user", "content": prompt}],
+                        temperature=0
+                    )
+                    resolved_content = response.choices[0].message.content or ""
                 
                 if resolved_content.strip():
                     # Write the resolved content
