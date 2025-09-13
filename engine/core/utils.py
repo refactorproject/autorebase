@@ -5,6 +5,7 @@ import logging
 import os
 import subprocess
 from dataclasses import asdict
+import shutil
 from pathlib import Path
 from typing import Any, Iterable, Optional
 
@@ -81,3 +82,22 @@ def ensure_dir(path: Path) -> None:
 def dump_dataclass_json(path: Path, obj: Any) -> None:
     write_json(path, asdict(obj))
 
+
+def copy_tree(src: Path, dst: Path) -> None:
+    """Copy a directory tree from src to dst (overwrite)."""
+    if dst.exists():
+        # remove existing to avoid stale files; best-effort
+        for p in list(dst.rglob("*")):
+            try:
+                if p.is_file() or p.is_symlink():
+                    p.unlink()
+            except Exception:
+                pass
+    for p in src.rglob("*"):
+        rel = p.relative_to(src)
+        out = dst / rel
+        if p.is_dir():
+            out.mkdir(parents=True, exist_ok=True)
+        else:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(p, out)

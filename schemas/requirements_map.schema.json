@@ -3,11 +3,15 @@
   "type": "array",
   "items": {
     "type": "object",
-    "required": ["path_glob", "req_ids"],
+    "oneOf": [
+      {"required": ["path_glob"]},
+      {"required": ["path"]}
+    ],
     "properties": {
       "path_glob": {"type": "string"},
-      "req_ids": {"type": "array", "items": {"type": "string"}}
+      "path": {"type": "string"},
+      "req_ids": {"type": "array", "items": {"type": "string"}},
+      "requirement": {"type": "string"}
     }
   }
 }
-

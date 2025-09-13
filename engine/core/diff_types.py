@@ -21,6 +21,7 @@ class PatchUnit(TypedDict, total=False):
     anchors: Optional[dict]
     req_ids: list[str]
     notes: Optional[str]
+    requirements: list[str]
 
 
 class Conflict(TypedDict):
@@ -53,4 +54,3 @@ class Adapter(Protocol):
     def apply(self, patch: PatchUnit, target_root: Path) -> ApplyResult: ...
 
     def validate(self, target_root: Path) -> list[ValidationIssue]: ...
-

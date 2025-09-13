@@ -5,7 +5,7 @@ from typing import Dict, List
 
 from .diff_types import PatchUnit
 from .utils import list_files, rel_to
-from .traceability import load_requirements_map, req_ids_for_file
+from .traceability import load_requirements_map, req_ids_for_file, requirement_texts_for_file
 from ..adapters import c_cpp, json_cfg, yaml_cfg, dtsi, text_generic
 
 
@@ -33,4 +33,5 @@ def extract_feature(old_base: Path, feature: Path, req_map_path: Path) -> List[P
     # Attach req_ids per file
     for u in units:
         u["req_ids"] = req_ids_for_file(u["file_path"], mappings)
+        u["requirements"] = requirement_texts_for_file(u["file_path"], mappings)
     return units

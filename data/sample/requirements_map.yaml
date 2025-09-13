@@ -6,4 +6,8 @@
   req_ids: ["AD-REQ-412"]
 - path_glob: "dts/**"
   req_ids: ["AD-REQ-501"]
+- path: "src/main.cpp"
+  req_ids: ["AD-REQ-601"]
+  requirement: "Feature: While calling API we need to pass 200 as input"
+
 
