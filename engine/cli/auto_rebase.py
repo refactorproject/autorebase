@@ -15,6 +15,13 @@ from ..core.ai_resolve import resolve_rejects
 from ..core.ai_direct_rebase import ai_direct_rebase
 from ..core import utils as U
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # python-dotenv not available, continue without it
+
 
 def _tools_matrix() -> dict[str, Any]:
     """Simplified tools matrix - all file types handled uniformly with git patches."""

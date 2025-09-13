@@ -9,6 +9,13 @@ from .utils import ensure_dir, write_json, read_text, write_text, copy_tree
 from .traceability import load_requirements_map, req_ids_for_file, requirement_texts_for_file
 from .ai_resolve import try_openai_resolve, heuristic_resolve
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # python-dotenv not available, continue without it
+
 
 # All file types are handled uniformly with git patches
 

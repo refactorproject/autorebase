@@ -6,6 +6,13 @@ from typing import Sequence
 
 from .utils import read_text, write_text
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # python-dotenv not available, continue without it
+
 
 def try_openai_resolve(rej_files: Sequence[Path], requirements: list[str]) -> dict[str, str]:
     """Attempt to call OpenAI to resolve rejects using requirements as guidance.
