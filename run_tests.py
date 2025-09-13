@@ -26,6 +26,7 @@ def run_tests():
         sys.executable, "-m", "pytest", 
         "tests/test_models.py", 
         "tests/test_services.py",
+        "tests/test_autorebase.py",
         "-v", "--tb=short"
     ])
     
