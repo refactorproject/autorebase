@@ -1,5 +1,5 @@
 import httpx
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 from ..models.github_models import GitHubSHARequest, GitHubSHAResponse
 
 
@@ -37,7 +37,7 @@ class GitHubService:
                     "error": f"Request failed: {str(e)}"
                 }
     
-    def extract_repo_info(self, repo_url: str) -> tuple[str, str]:
+    def extract_repo_info(self, repo_url: str) -> Tuple[str, str]:
         """Extract owner and repo name from GitHub URL"""
         # Expected format: https://github.com/owner/repo.git
         parts = repo_url.replace("https://github.com/", "").replace(".git", "")
