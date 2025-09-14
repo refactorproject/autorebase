@@ -99,4 +99,8 @@ class AutoRebaseResponse(BaseModel):
         default=None,
         description="Path to the saved changelog file"
     )
+    pr_results: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Results of PR creation operation"
+    )
     error: Optional[str] = Field(description="Error message if operation failed")

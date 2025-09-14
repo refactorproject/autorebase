@@ -48,6 +48,23 @@ class AutoRebaseService:
             if "autorebase_results" in results:
                 autorebase_results = AutoRebaseResult(**results["autorebase_results"])
             
+            # Create feature branch and PR if autorebase was successful OR if some files were processed
+            pr_results = None
+            if (results["success"] or (results.get("autorebase_results") and 
+                results["autorebase_results"].get("details", {}).get("step1_results", {}).get("applied_patches", []))) and request.output_branch:
+                from ..autorebase.github_operations import GitHubOperations
+                from pathlib import Path
+                github_ops = GitHubOperations(Path(request.work_dir))
+                # Construct f1_dir the same way as DiffPatchManager does
+                f1_dir = autorebase.base_1_dir.parent / "feature-5.1"
+                pr_results = github_ops.create_feature_branch_and_pr(
+                    feature_repo_url=request.feature_repo_url,
+                    feature_0_dir=autorebase.feature_0_dir,
+                    feature_51_dir=f1_dir,
+                    base_branch=request.base_branch,
+                    new_branch=request.output_branch
+                )
+            
             return AutoRebaseResponse(
                 success=results["success"],
                 message=results["message"],
@@ -59,6 +76,7 @@ class AutoRebaseService:
                 work_dir=request.work_dir,
                 clone_results=clone_results,
                 autorebase_results=autorebase_results,
+                pr_results=pr_results,
                 error=results.get("error")
             )
             

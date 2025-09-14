@@ -69,6 +69,19 @@ class DiffPatchManager:
         # Find intersection
         common_files = list(base_0_files.intersection(feature_0_files))
         
+        # Filter out .git files and other system files
+        filtered_files = []
+        for file_path in common_files:
+            # Skip .git directory files
+            if file_path.startswith('.git/'):
+                continue
+            # Skip other system files
+            if file_path.startswith('.') and file_path not in ['.gitignore', '.gitattributes']:
+                continue
+            filtered_files.append(file_path)
+        
+        common_files = filtered_files
+        
         # Sort for consistent ordering
         common_files.sort()
         

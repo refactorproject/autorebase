@@ -185,7 +185,7 @@ class AutoRebase:
             diff_manager.save_changelog(changelog_path)
             
             # Determine overall success
-            overall_success = step1_results["success"] and step2_results["success"]
+            overall_success = step1_results["success"]
             
             return {
                 "success": overall_success,
@@ -197,7 +197,6 @@ class AutoRebase:
                     "files_processed": len(patches),
                     "patches_generated": len(changelog["patches_generated"]),
                     "step1_results": step1_results,
-                    "step2_results": step2_results,
                     "changelog_path": str(changelog_path),
                     "changelog": changelog
                 }

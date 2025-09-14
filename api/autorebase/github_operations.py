@@ -15,8 +15,9 @@ class GitHubOperations:
     def __init__(self, work_dir: Path):
         self.work_dir = work_dir
     
+    
     def _get_authenticated_url(self, repo_url: str) -> str:
-        """Get authenticated repository URL using token or SSH"""
+        """Get authenticated repository URL using x-access-token format"""
         github_token = os.environ.get('GITHUB_TOKEN')
         
         # Check if SSH is preferred (no token or SSH_OVERRIDE env var)
@@ -30,13 +31,13 @@ class GitHubOperations:
                 # Generic HTTPS to SSH conversion
                 return repo_url.replace('https://', 'git@').replace('/', ':')
         
-        # Use token authentication
+        # Use x-access-token authentication format
         if github_token and 'github.com' in repo_url:
-            # Replace https:// with https://token@ for authentication
+            # Replace https:// with https://x-access-token:token@ for authentication
             if repo_url.startswith('https://github.com/'):
-                return repo_url.replace('https://github.com/', f'https://{github_token}@github.com/')
+                return repo_url.replace('https://github.com/', f'https://x-access-token:{github_token}@github.com/')
             elif repo_url.startswith('https://'):
-                return repo_url.replace('https://', f'https://{github_token}@')
+                return repo_url.replace('https://', f'https://x-access-token:{github_token}@')
         
         return repo_url
     
@@ -44,7 +45,7 @@ class GitHubOperations:
         """Get standard repository URL without embedded tokens"""
         # Convert any authenticated URL back to standard format
         if repo_url.startswith('https://') and '@' in repo_url:
-            # Remove token from URL: https://token@github.com/owner/repo -> https://github.com/owner/repo
+            # Remove token from URL: https://x-access-token:token@github.com/owner/repo -> https://github.com/owner/repo
             parts = repo_url.split('@', 1)
             if len(parts) == 2:
                 return f"https://{parts[1]}"
@@ -85,9 +86,9 @@ class GitHubOperations:
                 shutil.rmtree(feature_repo_dir)
             
             print(f"📥 Cloning feature repository to: {feature_repo_dir}")
-            standard_repo_url = self._get_standard_url(feature_repo_url)
+            auth_repo_url = self._get_authenticated_url(feature_repo_url)
             clone_result = subprocess.run(
-                ["git", "clone", standard_repo_url, str(feature_repo_dir)],
+                ["git", "clone", auth_repo_url, str(feature_repo_dir)],
                 capture_output=True,
                 text=True
             )
@@ -163,10 +164,10 @@ class GitHubOperations:
             
             # Step 6: Push the new branch
             print(f"🚀 Pushing new branch to remote")
-            # Use standard GitHub URL and let Git use local credentials
-            standard_repo_url = self._get_standard_url(feature_repo_url)
+            # Use authenticated GitHub URL with x-access-token
+            auth_repo_url = self._get_authenticated_url(feature_repo_url)
             remote_update_result = subprocess.run(
-                ["git", "remote", "set-url", "origin", standard_repo_url],
+                ["git", "remote", "set-url", "origin", auth_repo_url],
                 cwd=feature_repo_dir,
                 capture_output=True,
                 text=True

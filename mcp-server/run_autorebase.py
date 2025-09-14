@@ -9,13 +9,19 @@ import json
 import asyncio
 from pathlib import Path
 
-# Add the src directory to Python path
+# Add the parent directory (autorebase) to Python path to access the main API
 current_dir = Path(__file__).parent
-src_dir = current_dir / 'src'
-sys.path.insert(0, str(src_dir))
+parent_dir = current_dir.parent  # This is the autorebase directory
+sys.path.insert(0, str(parent_dir))
 
-from services.autorebase_service import AutoRebaseService
-from models.autorebase_models import AutoRebaseRequest
+# Also add the parent directory to PYTHONPATH environment variable
+os.environ['PYTHONPATH'] = str(parent_dir) + ':' + os.environ.get('PYTHONPATH', '')
+
+# Change to the parent directory to ensure imports work correctly
+os.chdir(parent_dir)
+
+from api.services.autorebase_service import AutoRebaseService
+from api.models.autorebase_models import AutoRebaseRequest
 
 async def main():
     try:
@@ -71,7 +77,8 @@ async def main():
             "resolved_files": getattr(result, 'resolved_files', []),
             "processing_details": getattr(result, 'processing_details', None),
             "clone_results": {k: v.dict() if hasattr(v, 'dict') else v for k, v in (getattr(result, 'clone_results', {}) or {}).items()},
-            "autorebase_results": getattr(result, 'autorebase_results', None).dict() if getattr(result, 'autorebase_results', None) and hasattr(getattr(result, 'autorebase_results', None), 'dict') else getattr(result, 'autorebase_results', None)
+            "autorebase_results": getattr(result, 'autorebase_results', None).dict() if getattr(result, 'autorebase_results', None) and hasattr(getattr(result, 'autorebase_results', None), 'dict') else getattr(result, 'autorebase_results', None),
+            "pr_results": getattr(result, 'pr_results', None)
         }
         
         # Add changelog information if available
