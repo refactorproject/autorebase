@@ -126,7 +126,18 @@ async def test_autorebase_sample():
                 if changelog.get('three_way_merges'):
                     print(f"\n  🔀 3-way merge attempts:")
                     for merge in changelog['three_way_merges']:
-                        print(f"    - {merge['target_file']} (patch: {merge['patch_name']})")
+                        status = merge.get('status', 'unknown')
+                        if status == 'success':
+                            print(f"    ✅ {merge['target_file']} (patch: {merge['patch_name']}) - AI resolved")
+                            print(f"       Conflict type: {merge.get('conflict_type', 'unknown')}")
+                            print(f"       Changes applied: {merge.get('changes_applied', [])}")
+                        elif status == 'failed':
+                            print(f"    ❌ {merge['target_file']} (patch: {merge['patch_name']}) - AI failed")
+                            print(f"       Error: {merge.get('error', 'unknown')}")
+                        elif status == 'failed_no_requirements':
+                            print(f"    ⚠️  {merge['target_file']} (patch: {merge['patch_name']}) - No requirements found")
+                        else:
+                            print(f"    🔄 {merge['target_file']} (patch: {merge['patch_name']}) - Status: {status}")
             
             # Changelog file location
             if 'changelog_path' in details:

@@ -11,4 +11,4 @@ dist/
 .next/
 coverage/
 *.log
-
+.env

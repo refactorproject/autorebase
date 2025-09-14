@@ -152,7 +152,8 @@ class AutoRebase:
             diff_manager = DiffPatchManager(
                 base_0_dir=self.base_0_dir,
                 base_1_dir=self.base_1_dir,
-                feature_0_dir=self.feature_0_dir
+                feature_0_dir=self.feature_0_dir,
+                work_dir=self.work_dir
             )
             
             # Step 1: Generate diff patches

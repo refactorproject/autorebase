@@ -15,7 +15,7 @@ class DiffPatchManager:
     Manages diff generation and patch application for AutoRebase
     """
     
-    def __init__(self, base_0_dir: Path, base_1_dir: Path, feature_0_dir: Path):
+    def __init__(self, base_0_dir: Path, base_1_dir: Path, feature_0_dir: Path, work_dir: Path = None):
         """
         Initialize with the three repository directories
         
@@ -23,10 +23,12 @@ class DiffPatchManager:
             base_0_dir: Path to base-0 directory
             base_1_dir: Path to base-1 directory  
             feature_0_dir: Path to feature-0 directory
+            work_dir: Path to work directory (for changelog and requirements)
         """
         self.base_0_dir = base_0_dir
         self.base_1_dir = base_1_dir
         self.feature_0_dir = feature_0_dir
+        self.work_dir = work_dir or base_1_dir.parent
         
         # Create f1 directory for output files (feature-5.1)
         self.f1_dir = base_1_dir.parent / "feature-5.1"
@@ -191,6 +193,8 @@ class DiffPatchManager:
                 continue
                 
             print(f"Creating f1 file: {file_path}")
+            print(f"    Base 1 file: {self.base_1_dir / file_path}")
+            print(f"    F1 file: {self.f1_dir / file_path}")
             
             # Create the f1 file by applying the patch to base_1 file
             success = self._create_f1_file(
@@ -352,12 +356,15 @@ class DiffPatchManager:
             True if f1 file was created successfully, False otherwise
         """
         try:
+            print(f"    Ensuring directory exists: {f1_file.parent}")
             # Ensure the f1 file directory exists
             f1_file.parent.mkdir(parents=True, exist_ok=True)
             
+            print(f"    Copying base_1 file to f1 file...")
             # Copy base_1 file to f1 file first
             import shutil
             shutil.copy2(base_1_file, f1_file)
+            print(f"    Copy completed")
             
             # Create a temporary patch file
             patch_file = f1_file.parent / f"{patch_name}.patch"
@@ -366,8 +373,9 @@ class DiffPatchManager:
                 f.write(patch_content)
             
             # Apply the patch to the f1 file
+            print(f"    Applying patch: patch {f1_file} {patch_file}")
             result = subprocess.run(
-                ["patch", str(f1_file), str(patch_file)],
+                ["patch", "--batch", str(f1_file), str(patch_file)],
                 capture_output=True,
                 text=True
             )
@@ -416,32 +424,132 @@ class DiffPatchManager:
     
     def process_3way_merge(self, target_file: Path, orig_file: Path, rej_file: Path, patch_name: str) -> None:
         """
-        Process 3-way merge for rejected patches
-        
+        Process 3-way merge for rejected patches using AI conflict resolution
+
         This method is called when a patch fails and generates .rej files.
-        Currently prints a method called message. Will be implemented in future steps.
-        
+        It uses OpenAI to resolve conflicts based on requirements from YAML file.
+
         Args:
             target_file: Path to the target file that failed to patch
             orig_file: Path to the .orig backup file
             rej_file: Path to the .rej reject file
             patch_name: Name of the patch that failed
         """
-        print(f"process_3way_merge() method called")
-        print(f"  Target file: {target_file}")
+        print(f"🤖 Starting AI-powered 3-way merge for: {target_file}")
         print(f"  Original backup: {orig_file}")
         print(f"  Reject file: {rej_file}")
         print(f"  Patch name: {patch_name}")
-        
-        # Store 3-way merge attempt in changelog
-        self.changelog.setdefault("three_way_merges", []).append({
-            "target_file": str(target_file),
-            "orig_file": str(orig_file),
-            "rej_file": str(rej_file),
-            "patch_name": patch_name,
-            "timestamp": datetime.now().isoformat(),
-            "status": "method_called"
-        })
+
+        try:
+            # Import the conflict resolver
+            from .file_conflict_resolver import resolve_file_conflict_with_openai
+            
+            # Find the requirements file (look for it in the work directory)
+            requirements_file = self.work_dir / "requirements_map.yaml"
+            if not requirements_file.exists():
+                # Try to find it in the parent directory
+                requirements_file = self.work_dir.parent / "requirements_map.yaml"
+            
+            if not requirements_file.exists():
+                print(f"⚠️  Requirements file not found at {requirements_file}")
+                print(f"   Falling back to original behavior for {target_file}")
+                
+                # Store failed 3-way merge attempt in changelog
+                self.changelog.setdefault("three_way_merges", []).append({
+                    "target_file": str(target_file),
+                    "orig_file": str(orig_file),
+                    "rej_file": str(rej_file),
+                    "patch_name": patch_name,
+                    "timestamp": datetime.now().isoformat(),
+                    "status": "fallback_no_requirements",
+                    "error": "Requirements file not found, using original behavior"
+                })
+                
+                # Fall back to original behavior (just print method called)
+                print(f"process_3way_merge() method called (fallback)")
+                print(f"  Target file: {target_file}")
+                print(f"  Original backup: {orig_file}")
+                print(f"  Reject file: {rej_file}")
+                print(f"  Patch name: {patch_name}")
+                return
+            
+            print(f"📋 Using requirements file: {requirements_file}")
+            
+            # Resolve the conflict using AI
+            resolution_result = resolve_file_conflict_with_openai(
+                original_file_path=orig_file,
+                rejection_file_path=rej_file,
+                requirements_file=requirements_file,
+                verbose=True
+            )
+            
+            if resolution_result["success"]:
+                print(f"✅ AI resolution successful!")
+                print(f"   Conflict type: {resolution_result['conflict_type']}")
+                print(f"   Changes applied: {resolution_result['changes_applied']}")
+                
+                # Write the resolved content to the target file
+                target_file.write_text(resolution_result["resolved_content"])
+                print(f"💾 Resolved content written to: {target_file}")
+                
+                # Store successful 3-way merge in changelog
+                self.changelog.setdefault("three_way_merges", []).append({
+                    "target_file": str(target_file),
+                    "orig_file": str(orig_file),
+                    "rej_file": str(rej_file),
+                    "patch_name": patch_name,
+                    "timestamp": datetime.now().isoformat(),
+                    "status": "success",
+                    "conflict_type": resolution_result["conflict_type"],
+                    "changes_applied": resolution_result["changes_applied"],
+                    "requirement_used": resolution_result["requirement_used"],
+                    "validation_score": resolution_result.get("validation_score", 0)
+                })
+                
+            else:
+                print(f"❌ AI resolution failed: {resolution_result['explanation']}")
+                print(f"   Falling back to original behavior for {target_file}")
+                
+                # Store failed 3-way merge attempt in changelog
+                self.changelog.setdefault("three_way_merges", []).append({
+                    "target_file": str(target_file),
+                    "orig_file": str(orig_file),
+                    "rej_file": str(rej_file),
+                    "patch_name": patch_name,
+                    "timestamp": datetime.now().isoformat(),
+                    "status": "fallback_ai_failed",
+                    "error": resolution_result["explanation"],
+                    "conflict_type": resolution_result.get("conflict_type", "unknown")
+                })
+                
+                # Fall back to original behavior (just print method called)
+                print(f"process_3way_merge() method called (fallback)")
+                print(f"  Target file: {target_file}")
+                print(f"  Original backup: {orig_file}")
+                print(f"  Reject file: {rej_file}")
+                print(f"  Patch name: {patch_name}")
+                
+        except Exception as e:
+            print(f"❌ Error during 3-way merge: {str(e)}")
+            print(f"   Falling back to original behavior for {target_file}")
+            
+            # Store error in changelog
+            self.changelog.setdefault("three_way_merges", []).append({
+                "target_file": str(target_file),
+                "orig_file": str(orig_file),
+                "rej_file": str(rej_file),
+                "patch_name": patch_name,
+                "timestamp": datetime.now().isoformat(),
+                "status": "fallback_exception",
+                "error": str(e)
+            })
+            
+            # Fall back to original behavior (just print method called)
+            print(f"process_3way_merge() method called (fallback)")
+            print(f"  Target file: {target_file}")
+            print(f"  Original backup: {orig_file}")
+            print(f"  Reject file: {rej_file}")
+            print(f"  Patch name: {patch_name}")
     
     def get_changelog(self) -> Dict[str, Any]:
         """
