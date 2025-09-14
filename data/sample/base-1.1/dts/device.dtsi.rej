@@ -1,0 +1,8 @@
+@@ -6,6 +6,7 @@
+     camera@0 {
+       compatible = "demo,camera-rvc";
+       status = "okay";
++      feature-timeout = <1>;
+     };
+   };
+ };

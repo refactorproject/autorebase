@@ -8,6 +8,7 @@ import shutil
 from pathlib import Path
 from typing import Dict, Any, Optional
 import asyncio
+from .diff_patch import DiffPatchManager
 
 
 class AutoRebase:
@@ -134,25 +135,84 @@ class AutoRebase:
         """
         Run the autorebase process
         
-        This is the main method that will be implemented in following steps.
-        Currently returns a placeholder response.
+        This implements the core AutoRebase algorithm:
+        1. Find common files between base_0 and feature_0
+        2. Generate diff patches for base_0 -> feature_0 and base_0 -> base_1
+        3. Apply patches in two steps:
+           - Step 1: Apply base_0 -> feature_0 patches to base_1
+           - Step 2: Apply base_0 -> base_1 patches to feature_0
         
         Returns:
             Dict with autorebase results
         """
-        # TODO: Implement actual autorebase logic
-        # This will be filled in the following steps
-        
-        return {
-            "success": True,
-            "message": "AutoRebase process completed successfully",
-            "details": {
-                "base_0_dir": str(self.base_0_dir),
-                "base_1_dir": str(self.base_1_dir),
-                "feature_0_dir": str(self.feature_0_dir),
-                "status": "placeholder - implementation pending"
+        try:
+            print("Starting AutoRebase process...")
+            
+            # Initialize diff and patch manager
+            diff_manager = DiffPatchManager(
+                base_0_dir=self.base_0_dir,
+                base_1_dir=self.base_1_dir,
+                feature_0_dir=self.feature_0_dir
+            )
+            
+            # Step 1: Generate diff patches
+            print("Generating diff patches...")
+            patches = diff_manager.generate_diff_patches()
+            
+            if not patches:
+                return {
+                    "success": True,
+                    "message": "No common files found between base_0 and feature_0",
+                    "details": {
+                        "files_processed": 0,
+                        "patches_generated": 0,
+                        "step1_applied": 0,
+                        "step2_applied": 0
+                    }
+                }
+            
+            print(f"Generated patches for {len(patches)} files")
+            
+            # Step 2: Apply base_0 -> feature_0 patches to base_1 and create f2 files
+            print("Applying base_0 -> feature_0 patches to base_1...")
+            step1_results = diff_manager.apply_patch_step1(patches)
+            
+            # Get changelog
+            changelog = diff_manager.get_changelog()
+            
+            # Save changelog
+            changelog_path = self.work_dir / "autorebase_changelog.json"
+            diff_manager.save_changelog(changelog_path)
+            
+            # Determine overall success
+            overall_success = step1_results["success"]
+            
+            return {
+                "success": overall_success,
+                "message": "AutoRebase process completed successfully" if overall_success else "AutoRebase process completed with some failures",
+                "details": {
+                    "base_0_dir": str(self.base_0_dir),
+                    "base_1_dir": str(self.base_1_dir),
+                    "feature_0_dir": str(self.feature_0_dir),
+                    "files_processed": len(patches),
+                    "patches_generated": len(changelog["patches_generated"]),
+                    "step1_results": step1_results,
+                    "changelog_path": str(changelog_path),
+                    "changelog": changelog
+                }
             }
-        }
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"AutoRebase process failed: {str(e)}",
+                "details": {
+                    "error": str(e),
+                    "base_0_dir": str(self.base_0_dir),
+                    "base_1_dir": str(self.base_1_dir),
+                    "feature_0_dir": str(self.feature_0_dir)
+                }
+            }
     
     async def process_repositories(self, base_repo_url: str, feature_repo_url: str,
                                  base_0_sha: str, base_1_sha: str, feature_0_sha: str) -> Dict[str, Any]:

@@ -1,6 +1,6 @@
 {
   "camera": {
-    "rvc": {
+    "rvcs": {
       "timeout": 100
     }
   }

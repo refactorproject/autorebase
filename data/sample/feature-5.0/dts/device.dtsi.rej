@@ -1,0 +1,11 @@
+@@ -4,8 +4,9 @@
+   model = "Demo-Board";
+   soc {
+     camera@0 {
+-      compatible = "demo,camera-rvc";
++      compatible = "demo,camera-rvcs";
+       status = "okay";
++      timeout-ms = <100>;
+     };
+   };
+ };
