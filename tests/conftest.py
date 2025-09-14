@@ -3,9 +3,9 @@ Pytest configuration and fixtures for AutoRebase API tests
 """
 
 import pytest
-from fastapi.testclient import TestClient
 from unittest.mock import AsyncMock, patch
 import httpx
+import asyncio
 
 from main import app
 
@@ -13,7 +13,8 @@ from main import app
 @pytest.fixture
 def client():
     """Create a test client for the FastAPI application"""
-    return TestClient(app=app)
+    # Use httpx directly instead of TestClient due to version compatibility issues
+    return httpx.AsyncClient(app=app, base_url="http://testserver")
 
 
 @pytest.fixture

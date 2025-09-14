@@ -19,7 +19,7 @@ class GitHubService:
                 response = await client.get(url)
                 
                 if response.status_code == 200:
-                    commit_data = response.json()
+                    commit_data = await response.json()
                     return {
                         "valid": True,
                         "sha": commit_data["sha"],

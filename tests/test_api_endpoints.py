@@ -40,9 +40,10 @@ class TestAPIEndpoints:
         assert "input_repos" in data["endpoints"]
         assert "health" in data["endpoints"]
     
-    def test_github_health_endpoint(self, client):
+    @pytest.mark.asyncio
+    async def test_github_health_endpoint(self, client):
         """Test GitHub service health endpoint"""
-        response = client.get("/github/health")
+        response = await client.get("/github/health")
         
         assert response.status_code == 200
         data = response.json()

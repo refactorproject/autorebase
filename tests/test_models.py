@@ -29,10 +29,28 @@ class TestGitHubSHARequest:
         assert request.base_repo_url == "https://github.com/microsoft/vscode.git"
         assert request.feature_repo_url == "https://github.com/microsoft/vscode.git"
     
-    def test_invalid_sha_format(self):
-        """Test invalid SHA format"""
+    def test_valid_tag_branch_request(self):
+        """Test valid request with Git tags/branches"""
         data = {
-            "base_software_0": "invalid_sha",
+            "base_software_0": "base/v1.0.0",
+            "base_software_1": "base/v1.0.1",
+            "feature_software_0": "feature/v5.0.0",
+            "base_repo_url": "https://github.com/microsoft/vscode.git",
+            "feature_repo_url": "https://github.com/microsoft/vscode.git"
+        }
+        
+        request = GitHubSHARequest(**data)
+        
+        assert request.base_software_0 == "base/v1.0.0"
+        assert request.base_software_1 == "base/v1.0.1"
+        assert request.feature_software_0 == "feature/v5.0.0"
+        assert request.base_repo_url == "https://github.com/microsoft/vscode.git"
+        assert request.feature_repo_url == "https://github.com/microsoft/vscode.git"
+    
+    def test_invalid_sha_format(self):
+        """Test invalid SHA format - now accepts tags/branches"""
+        data = {
+            "base_software_0": "invalid_sha!@#",  # Contains invalid characters
             "base_software_1": "def456789abc",
             "feature_software_0": "789abc123def",
             "base_repo_url": "https://github.com/microsoft/vscode.git",
@@ -45,9 +63,9 @@ class TestGitHubSHARequest:
         assert "String should match pattern" in str(exc_info.value)
     
     def test_short_sha(self):
-        """Test SHA that's too short"""
+        """Test SHA that's too short - now accepts shorter tags"""
         data = {
-            "base_software_0": "abc123",  # Too short
+            "base_software_0": "ab",  # Too short (less than min_length=3)
             "base_software_1": "def456789abc",
             "feature_software_0": "789abc123def",
             "base_repo_url": "https://github.com/microsoft/vscode.git",
@@ -57,7 +75,7 @@ class TestGitHubSHARequest:
         with pytest.raises(ValidationError) as exc_info:
             GitHubSHARequest(**data)
         
-        assert "at least 7 characters" in str(exc_info.value)
+        assert "at least 3 characters" in str(exc_info.value)
     
     def test_invalid_repo_url(self):
         """Test invalid repository URL"""

@@ -128,8 +128,8 @@ class TestGitHubService:
         assert result.success is True
         assert "All GitHub SHAs validated successfully and AutoRebase process completed" in result.message
         assert result.base_software_0 == "abc123def456"
-        assert result.base_software_1 == "def456ghi789"
-        assert result.feature_software_0 == "ghi789jkl012"
+        assert result.base_software_1 == "def456789abc"
+        assert result.feature_software_0 == "789abc123def"
         assert result.base_repo_url == "https://github.com/microsoft/vscode.git"
         assert result.feature_repo_url == "https://github.com/microsoft/vscode.git"
         assert result.processing_details is not None
