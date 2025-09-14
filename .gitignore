@@ -12,3 +12,4 @@ dist/
 coverage/
 *.log
 .env
+data/github_repos/

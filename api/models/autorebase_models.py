@@ -43,6 +43,14 @@ class AutoRebaseRequest(BaseModel):
         default="data/repos",
         description="Working directory for repository cloning and processing"
     )
+    output_branch: Optional[str] = Field(
+        default="feature/v5.0.1",
+        description="Output branch name for the new feature branch with resolved conflicts"
+    )
+    base_branch: Optional[str] = Field(
+        default="feature/v5.0.0",
+        description="Base branch name to create PR against (defaults to the feature branch from input)"
+    )
 
 
 class CloneResult(BaseModel):
@@ -51,7 +59,7 @@ class CloneResult(BaseModel):
     message: str = Field(description="Result message")
     directory: Optional[str] = Field(description="Directory where repository was cloned")
     sha: Optional[str] = Field(description="SHA that was checked out")
-    error: Optional[str] = Field(description="Error message if operation failed")
+    error: Optional[str] = Field(default=None, description="Error message if operation failed")
 
 
 class AutoRebaseResult(BaseModel):
@@ -72,9 +80,11 @@ class AutoRebaseResponse(BaseModel):
     feature_repo_url: str = Field(description="Feature repository URL used")
     work_dir: str = Field(description="Working directory used")
     clone_results: Optional[Dict[str, CloneResult]] = Field(
+        default=None,
         description="Results of repository cloning operations"
     )
     autorebase_results: Optional[AutoRebaseResult] = Field(
+        default=None,
         description="Results of autorebase operation"
     )
     error: Optional[str] = Field(description="Error message if operation failed")
