@@ -18,32 +18,32 @@ async def test_github_repos():
     github_data = {
         "base_software_0": {
             "repo_url": "https://github.com/refactorproject/sample-base-sw.git",
-            "sha": "19938f5dda2d4dd4f63183bc68035e443e1a2915",
+            "sha": "base/v1.0.0",  # Using tag instead of SHA
             "branch": "base/v1.0.0"
         },
         "base_software_1": {
             "repo_url": "https://github.com/refactorproject/sample-base-sw.git", 
-            "sha": "9b22ac11839bdb9fce1946e48073ab3ac6db19c6",
+            "sha": "base/v1.0.1",  # Using tag instead of SHA
             "branch": "base/v1.0.1"
         },
         "feature_software_0": {
             "repo_url": "https://github.com/refactorproject/sample-feature-sw.git",
-            "sha": "ccbefae20f7a140c336f3327fe9762a7855fe149", 
+            "sha": "feature/v5.0.0",  # Using tag instead of SHA
             "branch": "feature/v5.0.0"
         }
     }
     
     print("📋 Repository Information:")
     print(f"  Base SW 0: {github_data['base_software_0']['repo_url']}")
-    print(f"    SHA: {github_data['base_software_0']['sha']}")
+    print(f"    Tag: {github_data['base_software_0']['sha']}")
     print(f"    Branch: {github_data['base_software_0']['branch']}")
     print()
     print(f"  Base SW 1: {github_data['base_software_1']['repo_url']}")
-    print(f"    SHA: {github_data['base_software_1']['sha']}")
+    print(f"    Tag: {github_data['base_software_1']['sha']}")
     print(f"    Branch: {github_data['base_software_1']['branch']}")
     print()
     print(f"  Feature SW 0: {github_data['feature_software_0']['repo_url']}")
-    print(f"    SHA: {github_data['feature_software_0']['sha']}")
+    print(f"    Tag: {github_data['feature_software_0']['sha']}")
     print(f"    Branch: {github_data['feature_software_0']['branch']}")
     print()
     print("🎯 PR Configuration:")

@@ -37,7 +37,7 @@ class AutoRebase:
     
     async def clone_repository(self, repo_url: str, target_dir: Path, sha: str) -> Dict[str, Any]:
         """
-        Clone a repository and checkout specific SHA
+        Clone a repository and checkout specific SHA, always fetching latest changes
         
         Args:
             repo_url: GitHub repository URL
@@ -56,6 +56,16 @@ class AutoRebase:
             clone_cmd = ["git", "clone", repo_url, str(target_dir)]
             result = subprocess.run(
                 clone_cmd,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            
+            # Always fetch latest changes to ensure we have the most recent commits
+            fetch_cmd = ["git", "fetch", "origin"]
+            result = subprocess.run(
+                fetch_cmd,
+                cwd=target_dir,
                 capture_output=True,
                 text=True,
                 check=True

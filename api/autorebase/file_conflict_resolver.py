@@ -44,35 +44,59 @@ def find_requirement_for_file(file_path: str | Path, requirements_map: List[Dict
     # e.g., "/path/to/src/main.cpp.orig" -> "src/main.cpp"
     base_file_path = str(file_path_obj.parent / base_filename)
     
+    # Extract relative path from repository root
+    # Find the repository root by looking for common patterns
+    path_parts = Path(base_file_path).parts
+    repo_root_idx = None
+    
+    # Look for common repository root indicators
+    for i, part in enumerate(path_parts):
+        if part in ['data', 'src', 'configs', 'tools'] and i > 0:
+            repo_root_idx = i - 1  # Repository root is the parent of these directories
+            break
+    
+    if repo_root_idx is not None:
+        # Get relative path from repository root, but remove .orig/.rej from the filename
+        relative_parts = list(path_parts[repo_root_idx + 1:])
+        if relative_parts and relative_parts[-1].endswith(('.orig', '.rej')):
+            relative_parts[-1] = base_filename
+        relative_path = str(Path(*relative_parts))
+    else:
+        # Fallback: use the base file path (without .orig/.rej)
+        relative_path = base_file_path
+    
     # Try exact path match first
     for req in requirements_map:
         req_path = req.get('path')
         if req_path:
-            # Try exact match with the base path (without .orig/.rej)
-            if req_path == base_file_path:
-                return req.get('requirement')
+            # Try exact match with the relative path
+            if req_path == relative_path:
+                return req.get('requirement') or req.get('req_ids')
             # Try matching just the filename (e.g., "main.cpp" matches "main.cpp")
             if Path(req_path).name == base_filename:
-                return req.get('requirement')
+                return req.get('requirement') or req.get('req_ids')
             # Try relative path match (e.g., "src/main.cpp" matches "/full/path/src/main.cpp")
-            if base_file_path.endswith(req_path):
-                return req.get('requirement')
+            if relative_path.endswith(req_path):
+                return req.get('requirement') or req.get('req_ids')
     
     # Try glob pattern match
     for req in requirements_map:
         path_glob = req.get('path_glob')
         if path_glob:
             import fnmatch
+            # Try matching against the relative path (most important)
+            if fnmatch.fnmatch(relative_path, path_glob):
+                return req.get('requirement') or req.get('req_ids')
             # Try matching against the base path (without .orig/.rej)
             if fnmatch.fnmatch(base_file_path, path_glob):
-                return req.get('requirement')
+                return req.get('requirement') or req.get('req_ids')
             # Try matching against just the base filename
             if fnmatch.fnmatch(base_filename, path_glob):
-                return req.get('requirement')
+                return req.get('requirement') or req.get('req_ids')
             # Try matching against path components
             for part in file_path_obj.parts:
                 if fnmatch.fnmatch(part, path_glob):
-                    return req.get('requirement')
+                    return req.get('requirement') or req.get('req_ids')
     
     return None
 

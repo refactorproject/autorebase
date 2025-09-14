@@ -61,6 +61,18 @@ class GitHubOperations:
                     "error": clone_result.stderr
                 }
             
+            # Fetch latest changes to ensure we have the most recent commits
+            print(f"🔄 Fetching latest changes...")
+            fetch_result = subprocess.run(
+                ["git", "fetch", "origin"],
+                cwd=feature_repo_dir,
+                capture_output=True,
+                text=True
+            )
+            
+            if fetch_result.returncode != 0:
+                print(f"⚠️ Warning: Failed to fetch latest changes: {fetch_result.stderr}")
+            
             # Step 2: Checkout the base branch
             print(f"🔀 Checking out base branch: {base_branch}")
             checkout_result = subprocess.run(
