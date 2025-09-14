@@ -31,12 +31,12 @@ class TestManualIntegration:
         response = requests.get(f"{API_BASE}/github/")
         assert response.status_code == 200
         data = response.json()
-        assert data["message"] == "GitHub SHA Processing API"
-        assert "input_repos" in data["endpoints"]
+        assert data["message"] == "GitHub AutoRebase API"
+        assert "autorebase" in data["endpoints"]
     
     @pytest.mark.skip(reason="Requires running server")
     def test_input_repos_manual(self):
-        """Test the input-repos endpoint with running server"""
+        """Test the autorebase endpoint with running server"""
         test_data = {
             "base_software_0": "a1b2c3d4e5f6",
             "base_software_1": "b2c3d4e5f6g7",
@@ -46,7 +46,7 @@ class TestManualIntegration:
         }
         
         response = requests.post(
-            f"{API_BASE}/github/input-repos",
+            f"{API_BASE}/github/autorebase",
             json=test_data
         )
         
@@ -77,8 +77,8 @@ def run_manual_tests():
         print(f"Response: {response.json()}")
         print()
         
-        # Test input-repos endpoint
-        print("Testing input-repos endpoint...")
+        # Test autorebase endpoint
+        print("Testing autorebase endpoint...")
         test_data = {
             "base_software_0": "a1b2c3d4e5f6",
             "base_software_1": "b2c3d4e5f6g7",
@@ -88,7 +88,7 @@ def run_manual_tests():
         }
         
         response = requests.post(
-            f"{API_BASE}/github/input-repos",
+            f"{API_BASE}/github/autorebase",
             json=test_data
         )
         print(f"Status: {response.status_code}")

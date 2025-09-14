@@ -13,7 +13,7 @@ from main import app
 @pytest.fixture
 def client():
     """Create a test client for the FastAPI application"""
-    return TestClient(app)
+    return TestClient(app=app)
 
 
 @pytest.fixture

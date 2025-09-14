@@ -47,11 +47,11 @@ class TestAPIEndpoints:
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "healthy"
-        assert data["service"] == "GitHub SHA Processor"
+        assert data["service"] == "GitHub AutoRebase Processor"
     
     @patch('api.services.github_service.GitHubService.process_shas')
     def test_input_repos_success(self, mock_process_shas, client, valid_request_data):
-        """Test successful input-repos endpoint"""
+        """Test successful autorebase endpoint"""
         # Mock successful response
         mock_response = {
             "success": True,
@@ -69,7 +69,7 @@ class TestAPIEndpoints:
         }
         mock_process_shas.return_value = mock_response
         
-        response = client.post("/github/input-repos", json=valid_request_data)
+        response = client.post("/github/autorebase", json=valid_request_data)
         
         assert response.status_code == 200
         data = response.json()
@@ -81,7 +81,7 @@ class TestAPIEndpoints:
     
     @patch('api.services.github_service.GitHubService.process_shas')
     def test_input_repos_validation_failure(self, mock_process_shas, client, valid_request_data):
-        """Test input-repos endpoint with validation failure"""
+        """Test autorebase endpoint with validation failure"""
         # Mock validation failure response
         mock_response = {
             "success": False,
@@ -97,7 +97,7 @@ class TestAPIEndpoints:
         }
         mock_process_shas.return_value = mock_response
         
-        response = client.post("/github/input-repos", json=valid_request_data)
+        response = client.post("/github/autorebase", json=valid_request_data)
         
         assert response.status_code == 400
         data = response.json()
@@ -105,7 +105,7 @@ class TestAPIEndpoints:
         assert "Validation failed" in data["detail"]
     
     def test_input_repos_invalid_data(self, client):
-        """Test input-repos endpoint with invalid data"""
+        """Test autorebase endpoint with invalid data"""
         invalid_data = {
             "base_software_0": "invalid_sha",  # Invalid SHA format
             "base_software_1": "def456ghi789",
@@ -121,7 +121,7 @@ class TestAPIEndpoints:
         assert "detail" in data
     
     def test_input_repos_missing_fields(self, client):
-        """Test input-repos endpoint with missing fields"""
+        """Test autorebase endpoint with missing fields"""
         incomplete_data = {
             "base_software_0": "abc123def456",
             "base_software_1": "def456ghi789",
@@ -138,11 +138,11 @@ class TestAPIEndpoints:
     
     @patch('api.services.github_service.GitHubService.process_shas')
     def test_input_repos_server_error(self, mock_process_shas, client, valid_request_data):
-        """Test input-repos endpoint with server error"""
+        """Test autorebase endpoint with server error"""
         # Mock exception
         mock_process_shas.side_effect = Exception("Internal server error")
         
-        response = client.post("/github/input-repos", json=valid_request_data)
+        response = client.post("/github/autorebase", json=valid_request_data)
         
         assert response.status_code == 500
         data = response.json()

@@ -3,25 +3,25 @@ from typing import Optional
 from ..models.github_models import GitHubSHARequest, GitHubSHAResponse
 from ..services.github_service import GitHubService
 
-router = APIRouter(prefix="/github", tags=["GitHub SHA Processing"])
+router = APIRouter(prefix="/github", tags=["GitHub AutoRebase"])
 
 # Initialize the service
 github_service = GitHubService()
 
 
-@router.post("/input-repos", response_model=GitHubSHAResponse)
-async def input_repositories(request: GitHubSHARequest):
+@router.post("/autorebase", response_model=GitHubSHAResponse)
+async def run_autorebase(request: GitHubSHARequest):
     """
-    Process three GitHub SHAs with their repository URLs: Base Software 0, Base Software 1, and Feature Software 0.
+    Run the complete AutoRebase process with three GitHub repositories: Base Software 0, Base Software 1, and Feature Software 0.
 
-    This endpoint validates the provided GitHub SHAs against their respective repositories, 
-    clones the repositories to the specified SHAs, and automatically runs the AutoRebase process.
+    This endpoint validates the provided GitHub SHAs/tags against their respective repositories, 
+    clones the repositories, runs the AutoRebase process with AI conflict resolution, and creates a Pull Request.
 
     Args:
-        request: Contains the three GitHub SHAs and their repository URLs
+        request: Contains the three GitHub SHAs/tags and their repository URLs
 
     Returns:
-        GitHubSHAResponse: Contains validation results, commit information, and AutoRebase results
+        GitHubSHAResponse: Contains validation results, AutoRebase results, and PR creation details
     """
     try:
         result = await github_service.process_shas(request)
@@ -38,18 +38,18 @@ async def input_repositories(request: GitHubSHARequest):
 @router.get("/health")
 async def health_check():
     """Health check endpoint"""
-    return {"status": "healthy", "service": "GitHub SHA Processor"}
+    return {"status": "healthy", "service": "GitHub AutoRebase Processor"}
 
 
 @router.get("/")
 async def root():
     """Root endpoint with API information"""
     return {
-        "message": "GitHub SHA Processing and AutoRebase API",
+        "message": "GitHub AutoRebase API",
         "version": "1.0.0",
         "endpoints": {
-            "input_repos": "/github/input-repos",
+            "autorebase": "/github/autorebase",
             "health": "/github/health"
         },
-        "description": "Validates GitHub SHAs, clones repositories, and runs AutoRebase process automatically"
+        "description": "Runs complete AutoRebase process with AI conflict resolution and PR creation"
     }

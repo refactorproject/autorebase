@@ -36,7 +36,7 @@ The API will be available at:
 #### Using curl:
 
 ```bash
-curl -X POST "http://localhost:8000/github/input-repos" \
+curl -X POST "http://localhost:8000/github/autorebase" \
      -H "Content-Type: application/json" \
      -d '{
        "base_software_0": "abc123def456",
@@ -53,7 +53,7 @@ Visit http://localhost:8000/docs and use the Swagger UI to test the endpoints.
 
 ## API Endpoints
 
-### POST `/github/input-repos`
+### POST `/github/autorebase`
 
 Process three GitHub SHAs with their repository URLs and validate them against their respective repositories.
 
