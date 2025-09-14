@@ -70,6 +70,26 @@ export class AutoRebaseTools {
               type: 'boolean',
               description: 'Use SSH authentication instead of token (optional, can also use SSH_OVERRIDE=true env var)',
               default: false
+            },
+            organization_name: {
+              type: 'string',
+              description: 'Organization name for dynamic token generation (optional)',
+              default: null
+            },
+            repository_name: {
+              type: 'string',
+              description: 'Repository name for dynamic token generation (optional)',
+              default: null
+            },
+            internal_api_key: {
+              type: 'string',
+              description: 'Internal API key for dynamic token generation (optional)',
+              default: null
+            },
+            token_api_url: {
+              type: 'string',
+              description: 'API URL for token generation (optional, defaults to https://refactor.liftgate.io/api/github/tokens)',
+              default: 'https://refactor.liftgate.io/api/github/tokens'
             }
           },
           required: [
@@ -147,7 +167,7 @@ export class AutoRebaseTools {
 - **Feature Software 0**: ${result.feature_software_0}
 - **Base Repository**: ${result.base_repo_url}
 - **Feature Repository**: ${result.feature_repo_url}
-- **Authentication**: ${args.use_ssh ? 'SSH' : args.github_token ? 'GitHub Token provided' : 'Using local credentials'}
+- **Authentication**: ${args.use_ssh ? 'SSH' : args.github_token ? 'GitHub Token provided' : (args.organization_name && args.repository_name && args.internal_api_key) ? 'Dynamic token generation' : 'Using local credentials'}
 
 ## Resolved Files
 ${result.resolved_files && result.resolved_files.length > 0 

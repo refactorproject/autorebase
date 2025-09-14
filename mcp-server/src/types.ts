@@ -10,7 +10,12 @@ export const AutoRebaseRequestSchema = z.object({
   base_branch: z.string().optional().default('feature/v5.0.0').describe('Target branch for PR creation'),
   output_branch: z.string().optional().default('feature/v5.0.1').describe('New branch to create'),
   github_token: z.string().optional().describe('GitHub personal access token for authentication (optional, can also use GITHUB_TOKEN env var)'),
-  use_ssh: z.boolean().optional().default(false).describe('Use SSH authentication instead of token (optional, can also use SSH_OVERRIDE=true env var)')
+  use_ssh: z.boolean().optional().default(false).describe('Use SSH authentication instead of token (optional, can also use SSH_OVERRIDE=true env var)'),
+  // Dynamic token generation parameters
+  organization_name: z.string().optional().describe('Organization name for dynamic token generation'),
+  repository_name: z.string().optional().describe('Repository name for dynamic token generation'),
+  internal_api_key: z.string().optional().describe('Internal API key for dynamic token generation'),
+  token_api_url: z.string().url().optional().default('https://refactor.liftgate.io/api/github/tokens').describe('API URL for token generation')
 });
 
 export type AutoRebaseRequest = z.infer<typeof AutoRebaseRequestSchema>;

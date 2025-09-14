@@ -7,6 +7,7 @@ import sys
 import os
 import json
 import asyncio
+import requests
 from pathlib import Path
 
 # Add the parent directory (autorebase) to Python path to access the main API
@@ -22,6 +23,26 @@ os.chdir(parent_dir)
 
 from api.services.autorebase_service import AutoRebaseService
 from api.models.autorebase_models import AutoRebaseRequest
+
+def generate_github_token(organization_name, repository_name, internal_api_key, token_api_url):
+    """Generate GitHub token from the refactor.liftgate.io API"""
+    try:
+        payload = {
+            "organizationName": organization_name,
+            "repositoryName": repository_name,
+            "internalApiKey": internal_api_key
+        }
+        
+        response = requests.post(token_api_url, json=payload, timeout=30)
+        response.raise_for_status()
+        
+        data = response.json()
+        return data.get('installationToken')
+        
+    except requests.exceptions.RequestException as e:
+        raise Exception(f"Failed to generate GitHub token: {str(e)}")
+    except KeyError as e:
+        raise Exception(f"Invalid response from token API: missing {str(e)}")
 
 async def main():
     try:
@@ -41,9 +62,26 @@ async def main():
         # Initialize the service
         service = AutoRebaseService()
         
-        # Set GitHub token if provided
+        # Handle authentication - check for dynamic token generation first
         github_token = request_data.get('github_token') or os.environ.get('GITHUB_TOKEN')
         use_ssh = request_data.get('use_ssh', False)
+        
+        # Check if we need to generate a token dynamically
+        if not github_token and not use_ssh:
+            organization_name = request_data.get('organization_name')
+            repository_name = request_data.get('repository_name')
+            internal_api_key = request_data.get('internal_api_key')
+            token_api_url = request_data.get('token_api_url', 'https://refactor.liftgate.io/api/github/tokens')
+            
+            if organization_name and repository_name and internal_api_key:
+                try:
+                    github_token = generate_github_token(organization_name, repository_name, internal_api_key, token_api_url)
+                    if github_token:
+                        print(f"Generated GitHub token successfully", file=sys.stderr)
+                    else:
+                        print("Warning: Token generation returned empty token", file=sys.stderr)
+                except Exception as e:
+                    print(f"Warning: Failed to generate token: {str(e)}", file=sys.stderr)
         
         if use_ssh:
             os.environ['SSH_OVERRIDE'] = 'true'
