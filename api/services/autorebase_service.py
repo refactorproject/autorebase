@@ -3,8 +3,8 @@ Service for AutoRebase operations
 """
 
 from typing import Dict, Any
-from ..models.autorebase_models import AutoRebaseRequest, AutoRebaseResponse, CloneResult, AutoRebaseResult
-from ..autorebase.core import AutoRebase
+from models.autorebase_models import AutoRebaseRequest, AutoRebaseResponse, CloneResult, AutoRebaseResult
+from autorebase.core import AutoRebase
 
 
 class AutoRebaseService:

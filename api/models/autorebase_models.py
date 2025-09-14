@@ -3,7 +3,7 @@ Pydantic models for AutoRebase operations
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 
 class AutoRebaseRequest(BaseModel):
@@ -86,5 +86,9 @@ class AutoRebaseResponse(BaseModel):
     autorebase_results: Optional[AutoRebaseResult] = Field(
         default=None,
         description="Results of autorebase operation"
+    )
+    resolved_files: Optional[List[Dict[str, Any]]] = Field(
+        default=None,
+        description="List of resolved files with their content and conflict resolution details"
     )
     error: Optional[str] = Field(description="Error message if operation failed")

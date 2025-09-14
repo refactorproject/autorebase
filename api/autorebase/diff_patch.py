@@ -442,7 +442,7 @@ class DiffPatchManager:
 
         try:
             # Import the conflict resolver
-            from .file_conflict_resolver import resolve_file_conflict_with_openai
+            from autorebase.file_conflict_resolver import resolve_file_conflict_with_openai
             
             # Find the requirements file (look for it in the cloned repositories)
             requirements_file = None

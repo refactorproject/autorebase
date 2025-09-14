@@ -8,8 +8,8 @@ import shutil
 from pathlib import Path
 from typing import Dict, Any, Optional
 import asyncio
-from .diff_patch import DiffPatchManager
-from .github_operations import GitHubOperations
+from autorebase.diff_patch import DiffPatchManager
+from autorebase.github_operations import GitHubOperations
 
 
 class AutoRebase:

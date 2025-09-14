@@ -1,0 +1,365 @@
+{
+  "timestamp": "2025-09-14T13:21:46.625307",
+  "files_processed": [
+    ".git/FETCH_HEAD",
+    ".git/HEAD",
+    ".git/config",
+    ".git/index",
+    ".git/logs/HEAD",
+    ".git/logs/refs/heads/main",
+    ".git/logs/refs/remotes/origin/HEAD",
+    ".git/packed-refs",
+    ".git/refs/heads/main",
+    "README.md",
+    "configs/rvc/camera.json",
+    "configs/system/telemetry.yaml",
+    "src/common/math/metrics.cpp",
+    "src/vision/camera_pipeline.cpp",
+    "tools/build.sh",
+    "tools/run_checks.py",
+    "tools/test.sh"
+  ],
+  "patches_generated": [
+    "b0_to_f0",
+    "b0_to_f0",
+    "b0_to_b1",
+    "b0_to_f0",
+    "b0_to_b1",
+    "b0_to_f0",
+    "b0_to_b1",
+    "b0_to_f0",
+    "b0_to_b1",
+    "b0_to_f0",
+    "b0_to_b1",
+    "b0_to_f0",
+    "b0_to_b1",
+    "b0_to_f0",
+    "b0_to_f0",
+    "b0_to_f0",
+    "b0_to_f0",
+    "b0_to_b1",
+    "b0_to_f0",
+    "b0_to_b1",
+    "b0_to_f0",
+    "b0_to_b1",
+    "b0_to_f0",
+    "b0_to_b1",
+    "b0_to_f0",
+    "b0_to_f0",
+    "b0_to_b1",
+    "b0_to_f0"
+  ],
+  "patches_applied": [
+    {
+      "file": ".git/FETCH_HEAD",
+      "patch_type": "b0_to_f0",
+      "step": "step1",
+      "timestamp": "2025-09-14T13:21:47.552687"
+    },
+    {
+      "file": ".git/packed-refs",
+      "patch_type": "b0_to_f0",
+      "step": "step1",
+      "timestamp": "2025-09-14T13:21:47.616771"
+    },
+    {
+      "file": ".git/refs/heads/main",
+      "patch_type": "b0_to_f0",
+      "step": "step1",
+      "timestamp": "2025-09-14T13:21:47.620649"
+    },
+    {
+      "file": "README.md",
+      "patch_type": "b0_to_f0",
+      "step": "step1",
+      "timestamp": "2025-09-14T13:21:47.625302"
+    },
+    {
+      "file": "tools/build.sh",
+      "patch_type": "b0_to_f0",
+      "step": "step1",
+      "timestamp": "2025-09-14T13:22:02.341295"
+    },
+    {
+      "file": "tools/test.sh",
+      "patch_type": "b0_to_f0",
+      "step": "step1",
+      "timestamp": "2025-09-14T13:22:02.366082"
+    }
+  ],
+  "f1_files_created": [
+    {
+      "file": "data/repos/feature-5.1/.git/FETCH_HEAD",
+      "source_file": "data/repos/base-1/.git/FETCH_HEAD",
+      "patch_type": "b0_to_f0",
+      "timestamp": "2025-09-14T13:21:47.552714"
+    },
+    {
+      "file": "data/repos/feature-5.1/.git/packed-refs",
+      "source_file": "data/repos/base-1/.git/packed-refs",
+      "patch_type": "b0_to_f0",
+      "timestamp": "2025-09-14T13:21:47.616791"
+    },
+    {
+      "file": "data/repos/feature-5.1/.git/refs/heads/main",
+      "source_file": "data/repos/base-1/.git/refs/heads/main",
+      "patch_type": "b0_to_f0",
+      "timestamp": "2025-09-14T13:21:47.620667"
+    },
+    {
+      "file": "data/repos/feature-5.1/README.md",
+      "source_file": "data/repos/base-1/README.md",
+      "patch_type": "b0_to_f0",
+      "timestamp": "2025-09-14T13:21:47.625323"
+    },
+    {
+      "file": "data/repos/feature-5.1/tools/build.sh",
+      "source_file": "data/repos/base-1/tools/build.sh",
+      "patch_type": "b0_to_f0",
+      "timestamp": "2025-09-14T13:22:02.341367"
+    },
+    {
+      "file": "data/repos/feature-5.1/tools/test.sh",
+      "source_file": "data/repos/base-1/tools/test.sh",
+      "patch_type": "b0_to_f0",
+      "timestamp": "2025-09-14T13:22:02.366130"
+    }
+  ],
+  "backup_files": [
+    {
+      "file": "data/repos/feature-5.1/.git/HEAD.orig",
+      "original_file": "data/repos/feature-5.1/.git/HEAD",
+      "patch_name": "step1_.git_HEAD",
+      "timestamp": "2025-09-14T13:21:47.561966"
+    },
+    {
+      "file": "data/repos/feature-5.1/.git/config.orig",
+      "original_file": "data/repos/feature-5.1/.git/config",
+      "patch_name": "step1_.git_config",
+      "timestamp": "2025-09-14T13:21:47.584983"
+    },
+    {
+      "file": "data/repos/feature-5.1/.git/logs/HEAD.orig",
+      "original_file": "data/repos/feature-5.1/.git/logs/HEAD",
+      "patch_name": "step1_.git_logs_HEAD",
+      "timestamp": "2025-09-14T13:21:47.595863"
+    },
+    {
+      "file": "data/repos/feature-5.1/.git/logs/refs/heads/main.orig",
+      "original_file": "data/repos/feature-5.1/.git/logs/refs/heads/main",
+      "patch_name": "step1_.git_logs_refs_heads_main",
+      "timestamp": "2025-09-14T13:21:47.603017"
+    },
+    {
+      "file": "data/repos/feature-5.1/.git/logs/refs/remotes/origin/HEAD.orig",
+      "original_file": "data/repos/feature-5.1/.git/logs/refs/remotes/origin/HEAD",
+      "patch_name": "step1_.git_logs_refs_remotes_origin_HEAD",
+      "timestamp": "2025-09-14T13:21:47.610200"
+    },
+    {
+      "file": "data/repos/feature-5.1/configs/rvc/camera.json.orig",
+      "original_file": "data/repos/feature-5.1/configs/rvc/camera.json",
+      "patch_name": "step1_configs_rvc_camera.json",
+      "timestamp": "2025-09-14T13:21:47.629930"
+    },
+    {
+      "file": "data/repos/feature-5.1/configs/system/telemetry.yaml.orig",
+      "original_file": "data/repos/feature-5.1/configs/system/telemetry.yaml",
+      "patch_name": "step1_configs_system_telemetry.yaml",
+      "timestamp": "2025-09-14T13:21:51.520318"
+    },
+    {
+      "file": "data/repos/feature-5.1/src/common/math/metrics.cpp.orig",
+      "original_file": "data/repos/feature-5.1/src/common/math/metrics.cpp",
+      "patch_name": "step1_src_common_math_metrics.cpp",
+      "timestamp": "2025-09-14T13:21:52.620464"
+    },
+    {
+      "file": "data/repos/feature-5.1/src/vision/camera_pipeline.cpp.orig",
+      "original_file": "data/repos/feature-5.1/src/vision/camera_pipeline.cpp",
+      "patch_name": "step1_src_vision_camera_pipeline.cpp",
+      "timestamp": "2025-09-14T13:21:57.465152"
+    },
+    {
+      "file": "data/repos/feature-5.1/tools/run_checks.py.orig",
+      "original_file": "data/repos/feature-5.1/tools/run_checks.py",
+      "patch_name": "step1_tools_run_checks.py",
+      "timestamp": "2025-09-14T13:22:02.351652"
+    }
+  ],
+  "reject_files": [
+    {
+      "file": "data/repos/feature-5.1/.git/HEAD.rej",
+      "original_file": "data/repos/feature-5.1/.git/HEAD",
+      "patch_name": "step1_.git_HEAD",
+      "timestamp": "2025-09-14T13:21:47.561990"
+    },
+    {
+      "file": "data/repos/feature-5.1/.git/config.rej",
+      "original_file": "data/repos/feature-5.1/.git/config",
+      "patch_name": "step1_.git_config",
+      "timestamp": "2025-09-14T13:21:47.585007"
+    },
+    {
+      "file": "data/repos/feature-5.1/.git/logs/HEAD.rej",
+      "original_file": "data/repos/feature-5.1/.git/logs/HEAD",
+      "patch_name": "step1_.git_logs_HEAD",
+      "timestamp": "2025-09-14T13:21:47.595886"
+    },
+    {
+      "file": "data/repos/feature-5.1/.git/logs/refs/heads/main.rej",
+      "original_file": "data/repos/feature-5.1/.git/logs/refs/heads/main",
+      "patch_name": "step1_.git_logs_refs_heads_main",
+      "timestamp": "2025-09-14T13:21:47.603046"
+    },
+    {
+      "file": "data/repos/feature-5.1/.git/logs/refs/remotes/origin/HEAD.rej",
+      "original_file": "data/repos/feature-5.1/.git/logs/refs/remotes/origin/HEAD",
+      "patch_name": "step1_.git_logs_refs_remotes_origin_HEAD",
+      "timestamp": "2025-09-14T13:21:47.610227"
+    },
+    {
+      "file": "data/repos/feature-5.1/configs/rvc/camera.json.rej",
+      "original_file": "data/repos/feature-5.1/configs/rvc/camera.json",
+      "patch_name": "step1_configs_rvc_camera.json",
+      "timestamp": "2025-09-14T13:21:47.629950"
+    },
+    {
+      "file": "data/repos/feature-5.1/configs/system/telemetry.yaml.rej",
+      "original_file": "data/repos/feature-5.1/configs/system/telemetry.yaml",
+      "patch_name": "step1_configs_system_telemetry.yaml",
+      "timestamp": "2025-09-14T13:21:51.520376"
+    },
+    {
+      "file": "data/repos/feature-5.1/src/common/math/metrics.cpp.rej",
+      "original_file": "data/repos/feature-5.1/src/common/math/metrics.cpp",
+      "patch_name": "step1_src_common_math_metrics.cpp",
+      "timestamp": "2025-09-14T13:21:52.620536"
+    },
+    {
+      "file": "data/repos/feature-5.1/src/vision/camera_pipeline.cpp.rej",
+      "original_file": "data/repos/feature-5.1/src/vision/camera_pipeline.cpp",
+      "patch_name": "step1_src_vision_camera_pipeline.cpp",
+      "timestamp": "2025-09-14T13:21:57.465193"
+    },
+    {
+      "file": "data/repos/feature-5.1/tools/run_checks.py.rej",
+      "original_file": "data/repos/feature-5.1/tools/run_checks.py",
+      "patch_name": "step1_tools_run_checks.py",
+      "timestamp": "2025-09-14T13:22:02.351696"
+    }
+  ],
+  "three_way_merges": [
+    {
+      "target_file": "data/repos/feature-5.1/.git/HEAD",
+      "orig_file": "data/repos/feature-5.1/.git/HEAD.orig",
+      "rej_file": "data/repos/feature-5.1/.git/HEAD.rej",
+      "patch_name": "step1_.git_HEAD",
+      "timestamp": "2025-09-14T13:21:47.580026",
+      "status": "fallback_ai_failed",
+      "error": "No requirement found for file: data/repos/feature-5.1/.git/HEAD",
+      "conflict_type": "no_requirement"
+    },
+    {
+      "target_file": "data/repos/feature-5.1/.git/config",
+      "orig_file": "data/repos/feature-5.1/.git/config.orig",
+      "rej_file": "data/repos/feature-5.1/.git/config.rej",
+      "patch_name": "step1_.git_config",
+      "timestamp": "2025-09-14T13:21:47.587103",
+      "status": "fallback_ai_failed",
+      "error": "No requirement found for file: data/repos/feature-5.1/.git/config",
+      "conflict_type": "no_requirement"
+    },
+    {
+      "target_file": "data/repos/feature-5.1/.git/logs/HEAD",
+      "orig_file": "data/repos/feature-5.1/.git/logs/HEAD.orig",
+      "rej_file": "data/repos/feature-5.1/.git/logs/HEAD.rej",
+      "patch_name": "step1_.git_logs_HEAD",
+      "timestamp": "2025-09-14T13:21:47.598030",
+      "status": "fallback_ai_failed",
+      "error": "No requirement found for file: data/repos/feature-5.1/.git/logs/HEAD",
+      "conflict_type": "no_requirement"
+    },
+    {
+      "target_file": "data/repos/feature-5.1/.git/logs/refs/heads/main",
+      "orig_file": "data/repos/feature-5.1/.git/logs/refs/heads/main.orig",
+      "rej_file": "data/repos/feature-5.1/.git/logs/refs/heads/main.rej",
+      "patch_name": "step1_.git_logs_refs_heads_main",
+      "timestamp": "2025-09-14T13:21:47.605223",
+      "status": "fallback_ai_failed",
+      "error": "No requirement found for file: data/repos/feature-5.1/.git/logs/refs/heads/main",
+      "conflict_type": "no_requirement"
+    },
+    {
+      "target_file": "data/repos/feature-5.1/.git/logs/refs/remotes/origin/HEAD",
+      "orig_file": "data/repos/feature-5.1/.git/logs/refs/remotes/origin/HEAD.orig",
+      "rej_file": "data/repos/feature-5.1/.git/logs/refs/remotes/origin/HEAD.rej",
+      "patch_name": "step1_.git_logs_refs_remotes_origin_HEAD",
+      "timestamp": "2025-09-14T13:21:47.612379",
+      "status": "fallback_ai_failed",
+      "error": "No requirement found for file: data/repos/feature-5.1/.git/logs/refs/remotes/origin/HEAD",
+      "conflict_type": "no_requirement"
+    },
+    {
+      "target_file": "data/repos/feature-5.1/configs/rvc/camera.json",
+      "orig_file": "data/repos/feature-5.1/configs/rvc/camera.json.orig",
+      "rej_file": "data/repos/feature-5.1/configs/rvc/camera.json.rej",
+      "patch_name": "step1_configs_rvc_camera.json",
+      "timestamp": "2025-09-14T13:21:51.508896",
+      "status": "success",
+      "conflict_type": "content_change",
+      "changes_applied": [],
+      "requirement_used": "Feature: We need to make exposure to manual and log_level to info",
+      "validation_score": 0
+    },
+    {
+      "target_file": "data/repos/feature-5.1/configs/system/telemetry.yaml",
+      "orig_file": "data/repos/feature-5.1/configs/system/telemetry.yaml.orig",
+      "rej_file": "data/repos/feature-5.1/configs/system/telemetry.yaml.rej",
+      "patch_name": "step1_configs_system_telemetry.yaml",
+      "timestamp": "2025-09-14T13:21:52.606590",
+      "status": "success",
+      "conflict_type": "content_change",
+      "changes_applied": [],
+      "requirement_used": "Feature: We need to make upload_interval_sec to 30 and tags to ['rvc', 'debug']",
+      "validation_score": 0
+    },
+    {
+      "target_file": "data/repos/feature-5.1/src/common/math/metrics.cpp",
+      "orig_file": "data/repos/feature-5.1/src/common/math/metrics.cpp.orig",
+      "rej_file": "data/repos/feature-5.1/src/common/math/metrics.cpp.rej",
+      "patch_name": "step1_src_common_math_metrics.cpp",
+      "timestamp": "2025-09-14T13:21:57.391145",
+      "status": "success",
+      "conflict_type": "header_change",
+      "changes_applied": [],
+      "requirement_used": "Feature: We need to add Median function",
+      "validation_score": 0
+    },
+    {
+      "target_file": "data/repos/feature-5.1/src/vision/camera_pipeline.cpp",
+      "orig_file": "data/repos/feature-5.1/src/vision/camera_pipeline.cpp.orig",
+      "rej_file": "data/repos/feature-5.1/src/vision/camera_pipeline.cpp.rej",
+      "patch_name": "step1_src_vision_camera_pipeline.cpp",
+      "timestamp": "2025-09-14T13:22:02.326748",
+      "status": "success",
+      "conflict_type": "content_change",
+      "changes_applied": [
+        "Updated to NewAPI",
+        "Maintained file structure"
+      ],
+      "requirement_used": "Feature: we need to compare height against 5",
+      "validation_score": 2
+    },
+    {
+      "target_file": "data/repos/feature-5.1/tools/run_checks.py",
+      "orig_file": "data/repos/feature-5.1/tools/run_checks.py.orig",
+      "rej_file": "data/repos/feature-5.1/tools/run_checks.py.rej",
+      "patch_name": "step1_tools_run_checks.py",
+      "timestamp": "2025-09-14T13:22:02.358266",
+      "status": "fallback_ai_failed",
+      "error": "No requirement found for file: data/repos/feature-5.1/tools/run_checks.py",
+      "conflict_type": "no_requirement"
+    }
+  ]
+}

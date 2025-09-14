@@ -20,7 +20,46 @@ A FastAPI application for processing GitHub SHAs and software versioning operati
 pip install -r requirements.txt
 ```
 
-### 2. Run the Application
+### 2. Set Up Environment Variables
+
+Create a `.env` file in the project root:
+
+```bash
+# Copy the example file
+cp .env.example .env
+
+# Edit with your actual API keys
+nano .env
+```
+
+**Required Environment Variables:**
+
+```bash
+# OpenAI API Key (required for AI conflict resolution)
+OPENAI_API_KEY=sk-your-openai-api-key-here
+
+# GitHub Personal Access Token (optional, for repository operations)
+# Get your token from: https://github.com/settings/tokens
+GITHUB_TOKEN=ghp_your-github-token-here
+
+# Optional: Set to 'true' for debug logging
+DEBUG=false
+```
+
+**Getting Your API Keys:**
+
+1. **OpenAI API Key:**
+   - Go to [OpenAI Platform](https://platform.openai.com/api-keys)
+   - Create a new API key
+   - Copy the key (starts with `sk-`)
+
+2. **GitHub Token (Optional):**
+   - Go to [GitHub Settings > Personal Access Tokens](https://github.com/settings/tokens)
+   - Click "Generate new token" → "Generate new token (classic)"
+   - Select scopes: `repo`, `workflow`
+   - Copy the token (starts with `ghp_`)
+
+### 3. Run the Application
 
 ```bash
 python main.py
@@ -93,6 +132,50 @@ Health check endpoint for the GitHub service.
 ### GET `/health`
 
 Overall API health check.
+
+## Environment Configuration
+
+### Environment Variables
+
+The application uses environment variables for configuration. Create a `.env` file in the project root:
+
+```bash
+# Copy the example file
+cp .env.example .env
+```
+
+**Required Variables:**
+
+| Variable | Description | Required | Example |
+|----------|-------------|----------|---------|
+| `OPENAI_API_KEY` | OpenAI API key for AI conflict resolution | ✅ Yes | `sk-...` |
+| `GITHUB_TOKEN` | GitHub personal access token for repository operations | ❌ Optional | `ghp_...` |
+| `DEBUG` | Enable debug logging | ❌ Optional | `true`/`false` |
+
+### Authentication Setup
+
+#### OpenAI API Key
+1. Visit [OpenAI Platform](https://platform.openai.com/api-keys)
+2. Create a new API key
+3. Copy the key (starts with `sk-`)
+4. Add to `.env`: `OPENAI_API_KEY=sk-your-key-here`
+
+#### GitHub Token (Optional)
+1. Visit [GitHub Settings > Personal Access Tokens](https://github.com/settings/tokens)
+2. Click "Generate new token" → "Generate new token (classic)"
+3. Select required scopes:
+   - ✅ `repo` (Full control of private repositories)
+   - ✅ `workflow` (Update GitHub Action workflows)
+4. Copy the token (starts with `ghp_`)
+5. Add to `.env`: `GITHUB_TOKEN=ghp_your-token-here`
+
+### Security Notes
+
+- ✅ **Never commit `.env`** to version control
+- ✅ **Use `.env.example`** for sharing the format
+- ✅ **GitHub tokens** are automatically loaded from `.env`
+- ✅ **Fallback to local credentials** if no token provided
+- ✅ **Token is masked** in debug output (`ghp_12345...`)
 
 ## Development
 

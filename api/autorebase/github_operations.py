@@ -15,6 +15,17 @@ class GitHubOperations:
     def __init__(self, work_dir: Path):
         self.work_dir = work_dir
     
+    def _get_authenticated_url(self, repo_url: str) -> str:
+        """Get authenticated repository URL if GitHub token is available"""
+        github_token = os.environ.get('GITHUB_TOKEN')
+        if github_token and 'github.com' in repo_url:
+            # Replace https:// with https://token@ for authentication
+            if repo_url.startswith('https://github.com/'):
+                return repo_url.replace('https://github.com/', f'https://{github_token}@github.com/')
+            elif repo_url.startswith('https://'):
+                return repo_url.replace('https://', f'https://{github_token}@')
+        return repo_url
+    
     def create_feature_branch_and_pr(
         self, 
         feature_repo_url: str,
@@ -48,8 +59,9 @@ class GitHubOperations:
                 shutil.rmtree(feature_repo_dir)
             
             print(f"📥 Cloning feature repository to: {feature_repo_dir}")
+            auth_repo_url = self._get_authenticated_url(feature_repo_url)
             clone_result = subprocess.run(
-                ["git", "clone", feature_repo_url, str(feature_repo_dir)],
+                ["git", "clone", auth_repo_url, str(feature_repo_dir)],
                 capture_output=True,
                 text=True
             )
@@ -125,6 +137,15 @@ class GitHubOperations:
             
             # Step 6: Push the new branch
             print(f"🚀 Pushing new branch to remote")
+            # Update remote URL to use authenticated URL
+            auth_repo_url = self._get_authenticated_url(feature_repo_url)
+            remote_update_result = subprocess.run(
+                ["git", "remote", "set-url", "origin", auth_repo_url],
+                cwd=feature_repo_dir,
+                capture_output=True,
+                text=True
+            )
+            
             push_result = subprocess.run(
                 ["git", "push", "origin", new_branch],
                 cwd=feature_repo_dir,
