@@ -40,6 +40,18 @@ class GitHubOperations:
         
         return repo_url
     
+    def _get_standard_url(self, repo_url: str) -> str:
+        """Get standard repository URL without embedded tokens"""
+        # Convert any authenticated URL back to standard format
+        if repo_url.startswith('https://') and '@' in repo_url:
+            # Remove token from URL: https://token@github.com/owner/repo -> https://github.com/owner/repo
+            parts = repo_url.split('@', 1)
+            if len(parts) == 2:
+                return f"https://{parts[1]}"
+        
+        # Return as-is if already standard format
+        return repo_url
+    
     def create_feature_branch_and_pr(
         self, 
         feature_repo_url: str,
@@ -73,9 +85,9 @@ class GitHubOperations:
                 shutil.rmtree(feature_repo_dir)
             
             print(f"📥 Cloning feature repository to: {feature_repo_dir}")
-            auth_repo_url = self._get_authenticated_url(feature_repo_url)
+            standard_repo_url = self._get_standard_url(feature_repo_url)
             clone_result = subprocess.run(
-                ["git", "clone", auth_repo_url, str(feature_repo_dir)],
+                ["git", "clone", standard_repo_url, str(feature_repo_dir)],
                 capture_output=True,
                 text=True
             )
@@ -151,10 +163,10 @@ class GitHubOperations:
             
             # Step 6: Push the new branch
             print(f"🚀 Pushing new branch to remote")
-            # Update remote URL to use authenticated URL
-            auth_repo_url = self._get_authenticated_url(feature_repo_url)
+            # Use standard GitHub URL and let Git use local credentials
+            standard_repo_url = self._get_standard_url(feature_repo_url)
             remote_update_result = subprocess.run(
-                ["git", "remote", "set-url", "origin", auth_repo_url],
+                ["git", "remote", "set-url", "origin", standard_repo_url],
                 cwd=feature_repo_dir,
                 capture_output=True,
                 text=True
