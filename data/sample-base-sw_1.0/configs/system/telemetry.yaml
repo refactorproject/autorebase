@@ -1,3 +1,0 @@
-telemetry:
-  enabled: true
-  upload_interval_sec: 60

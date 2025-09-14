@@ -1,0 +1,103 @@
+{
+  "timestamp": "2025-09-14T11:17:48.454919",
+  "files_processed": [
+    "configs/config.json",
+    "configs/settings.yaml",
+    "dts/device.dtsi",
+    "src/main.cpp"
+  ],
+  "patches_generated": [
+    "b0_to_f0",
+    "b0_to_f0",
+    "b0_to_b1",
+    "b0_to_f0",
+    "b0_to_b1",
+    "b0_to_f0",
+    "b0_to_b1"
+  ],
+  "patches_applied": [
+    {
+      "file": "configs/config.json",
+      "patch_type": "b0_to_f0",
+      "step": "step1",
+      "timestamp": "2025-09-14T11:17:48.534133"
+    },
+    {
+      "file": "configs/settings.yaml",
+      "patch_type": "b0_to_f0",
+      "step": "step1",
+      "timestamp": "2025-09-14T11:17:48.544443"
+    }
+  ],
+  "f1_files_created": [
+    {
+      "file": "data/sample/feature-5.1/configs/config.json",
+      "source_file": "data/sample/base-1.1/configs/config.json",
+      "patch_type": "b0_to_f0",
+      "timestamp": "2025-09-14T11:17:48.534176"
+    },
+    {
+      "file": "data/sample/feature-5.1/configs/settings.yaml",
+      "source_file": "data/sample/base-1.1/configs/settings.yaml",
+      "patch_type": "b0_to_f0",
+      "timestamp": "2025-09-14T11:17:48.544492"
+    }
+  ],
+  "backup_files": [
+    {
+      "file": "data/sample/feature-5.1/dts/device.dtsi.orig",
+      "original_file": "data/sample/feature-5.1/dts/device.dtsi",
+      "patch_name": "step1_dts_device.dtsi",
+      "timestamp": "2025-09-14T11:17:48.552490"
+    },
+    {
+      "file": "data/sample/feature-5.1/src/main.cpp.orig",
+      "original_file": "data/sample/feature-5.1/src/main.cpp",
+      "patch_name": "step1_src_main.cpp",
+      "timestamp": "2025-09-14T11:17:48.584920"
+    }
+  ],
+  "reject_files": [
+    {
+      "file": "data/sample/feature-5.1/dts/device.dtsi.rej",
+      "original_file": "data/sample/feature-5.1/dts/device.dtsi",
+      "patch_name": "step1_dts_device.dtsi",
+      "timestamp": "2025-09-14T11:17:48.552523"
+    },
+    {
+      "file": "data/sample/feature-5.1/src/main.cpp.rej",
+      "original_file": "data/sample/feature-5.1/src/main.cpp",
+      "patch_name": "step1_src_main.cpp",
+      "timestamp": "2025-09-14T11:17:48.585013"
+    }
+  ],
+  "three_way_merges": [
+    {
+      "target_file": "data/sample/feature-5.1/dts/device.dtsi",
+      "orig_file": "data/sample/feature-5.1/dts/device.dtsi.orig",
+      "rej_file": "data/sample/feature-5.1/dts/device.dtsi.rej",
+      "patch_name": "step1_dts_device.dtsi",
+      "timestamp": "2025-09-14T11:17:48.573022",
+      "status": "fallback_ai_failed",
+      "error": "No requirement found for file: data/sample/feature-5.1/dts/device.dtsi.orig",
+      "conflict_type": "no_requirement"
+    },
+    {
+      "target_file": "data/sample/feature-5.1/src/main.cpp",
+      "orig_file": "data/sample/feature-5.1/src/main.cpp.orig",
+      "rej_file": "data/sample/feature-5.1/src/main.cpp.rej",
+      "patch_name": "step1_src_main.cpp",
+      "timestamp": "2025-09-14T11:17:51.292767",
+      "status": "success",
+      "conflict_type": "api_change",
+      "changes_applied": [
+        "Applied requirement value (200)",
+        "Updated to NewAPI",
+        "Preserved feature logging",
+        "Maintained file structure"
+      ],
+      "requirement_used": "Feature: While calling API we need to pass 200 as input",
+      "validation_score": 4
+    }
+  ]
+}

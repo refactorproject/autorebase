@@ -1,6 +1,0 @@
-- path_glob: "src/vision/**"
-  req_ids: ["REQ-RVC-201","REQ-RVC-318"]
-- path_glob: "configs/rvc/*.json"
-  req_ids: ["REQ-RVC-411"]
-- path_glob: "services/*.service"
-  req_ids: ["REQ-OPS-021"]
