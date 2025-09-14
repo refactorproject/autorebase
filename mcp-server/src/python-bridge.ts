@@ -1,6 +1,11 @@
 import { spawn } from 'child_process';
 import { promisify } from 'util';
 import { AutoRebaseRequest, AutoRebaseResponse } from './types.js';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename); 
 
 /**
  * Python bridge for calling AutoRebase functionality
@@ -11,7 +16,7 @@ export class PythonBridge {
 
   constructor() {
     this.pythonPath = 'python3'; // Default to python3
-    this.autorebasePath = '../api/services/autorebase_service.py'; // Relative to mcp-server
+    this.autorebasePath = './src/services/autorebase_service.py'; // Relative to mcp-server
   }
 
   /**
@@ -19,97 +24,11 @@ export class PythonBridge {
    */
   async callAutoRebase(request: AutoRebaseRequest): Promise<AutoRebaseResponse> {
     return new Promise((resolve, reject) => {
-      const pythonScript = `
-import sys
-import os
-import json
-import asyncio
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
-
-# Add the api directory to Python path
-sys.path.insert(0, os.path.join(os.getcwd(), 'api'))
-
-from services.autorebase_service import AutoRebaseService
-from models.autorebase_models import AutoRebaseRequest
-
-async def main():
-    try:
-        # Parse the request
-        request_data = json.loads(sys.argv[1])
-        
-        # Create the request object
-        autorebase_request = AutoRebaseRequest(**request_data)
-        
-        # Initialize the service
-        service = AutoRebaseService()
-        
-        # Set GitHub token if provided
-        github_token = request_data.get('github_token') or os.environ.get('GITHUB_TOKEN')
-        use_ssh = request_data.get('use_ssh', False)
-        
-        if use_ssh:
-            os.environ['SSH_OVERRIDE'] = 'true'
-            print("Using SSH authentication", file=sys.stderr)
-        elif github_token:
-            os.environ['GITHUB_TOKEN'] = github_token
-            print(f"Using GitHub token: {github_token[:8]}...", file=sys.stderr)
-        else:
-            print("No authentication provided, using local credentials", file=sys.stderr)
-        
-        # Redirect stdout to stderr to prevent debug output from breaking JSON parsing
-        import contextlib
-        from io import StringIO
-        
-        # Capture stdout and redirect to stderr
-        original_stdout = sys.stdout
-        sys.stdout = sys.stderr
-        
-        # Process the autorebase
-        result = await service.process_autorebase(autorebase_request)
-        
-        # Convert to dict and return
-        result_dict = {
-            "success": result.success,
-            "message": result.message,
-            "base_software_0": result.base_software_0,
-            "base_software_1": result.base_software_1,
-            "feature_software_0": result.feature_software_0,
-            "base_repo_url": result.base_repo_url,
-            "feature_repo_url": result.feature_repo_url,
-            "work_dir": result.work_dir,
-            "resolved_files": getattr(result, 'resolved_files', []),
-            "processing_details": getattr(result, 'processing_details', None),
-            "clone_results": {k: v.dict() if hasattr(v, 'dict') else v for k, v in (getattr(result, 'clone_results', {}) or {}).items()},
-            "autorebase_results": getattr(result, 'autorebase_results', None).dict() if getattr(result, 'autorebase_results', None) and hasattr(getattr(result, 'autorebase_results', None), 'dict') else getattr(result, 'autorebase_results', None)
-        }
-        
-        # Restore stdout and print final JSON result
-        sys.stdout = original_stdout
-        print(json.dumps(result_dict))
-
-    except Exception as e:
-        error_result = {
-            "success": False,
-            "message": f"Python execution error: {str(e)}",
-            "base_software_0": request_data.get("base_software_0", ""),
-            "base_software_1": request_data.get("base_software_1", ""),
-            "feature_software_0": request_data.get("feature_software_0", ""),
-            "base_repo_url": request_data.get("base_repo_url", ""),
-            "feature_repo_url": request_data.get("feature_repo_url", ""),
-            "resolved_files": [],
-            "processing_details": None
-        }
-        print(json.dumps(error_result))
-
-if __name__ == "__main__":
-    asyncio.run(main())
-`;
-
-      const pythonProcess = spawn(this.pythonPath, ['-c', pythonScript, JSON.stringify(request)], {
-        cwd: process.cwd(),
+      const scriptPath = path.join(__dirname, '..', 'run_autorebase_wrapper.py');
+      const workingDir = path.join(__dirname, '..');
+      
+      const pythonProcess = spawn(this.pythonPath, [scriptPath, JSON.stringify(request)], {
+        cwd: workingDir,
         stdio: ['pipe', 'pipe', 'pipe']
       });
 
@@ -235,7 +154,7 @@ if __name__ == "__main__":
 `;
 
       const pythonProcess = spawn(this.pythonPath, ['-c', pythonScript, repoUrl, shaOrTag], {
-        cwd: process.cwd(),
+        cwd: path.join(__dirname, '..'),
         stdio: ['pipe', 'pipe', 'pipe']
       });
 

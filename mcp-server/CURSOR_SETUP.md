@@ -163,3 +163,6 @@ Once configured, your Cursor AI agent will have access to powerful AutoRebase fu
 - SSH and token authentication support
 
 The MCP server runs locally and integrates seamlessly with your existing AutoRebase Python backend.
+
+
+
