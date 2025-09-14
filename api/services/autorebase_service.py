@@ -37,6 +37,17 @@ class AutoRebaseService:
                 feature_0_sha=request.feature_software_0
             )
             
+            # Step 3: Create feature PR if autorebase completed (even with some failures)
+            pr_results = None
+            if results.get("success") and results.get("autorebase_results"):
+                print("🚀 Creating feature PR...")
+                pr_results = await autorebase.create_feature_pr(
+                    feature_repo_url=request.feature_repo_url,
+                    base_branch=request.base_branch,
+                    new_branch=request.output_branch
+                )
+                print(f"PR creation result: {pr_results.get('success', False)}")
+            
             # Convert results to response format
             clone_results = None
             if "clone_results" in results:
@@ -47,6 +58,12 @@ class AutoRebaseService:
             autorebase_results = None
             if "autorebase_results" in results:
                 autorebase_results = AutoRebaseResult(**results["autorebase_results"])
+            
+            # Add PR results to autorebase results if available
+            if pr_results and autorebase_results:
+                if autorebase_results.details is None:
+                    autorebase_results.details = {}
+                autorebase_results.details["pr_results"] = pr_results
             
             return AutoRebaseResponse(
                 success=results["success"],

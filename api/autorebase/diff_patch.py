@@ -444,13 +444,35 @@ class DiffPatchManager:
             # Import the conflict resolver
             from .file_conflict_resolver import resolve_file_conflict_with_openai
             
-            # Find the requirements file (look for it in the work directory)
-            requirements_file = self.work_dir / "requirements_map.yaml"
-            if not requirements_file.exists():
-                # Try to find it in the parent directory
-                requirements_file = self.work_dir.parent / "requirements_map.yaml"
+            # Find the requirements file (look for it in the cloned repositories)
+            requirements_file = None
             
-            if not requirements_file.exists():
+            # Priority order for finding requirements_map.yaml:
+            # 1. Feature repository root (most important - this is the default)
+            # 2. Feature repository data folder (if exists)
+            # 3. Base repository root
+            # 4. Base repository data folder (if exists)
+            # 5. Work directory fallback
+            
+            if self.feature_0_dir and (self.feature_0_dir / "REQUIREMENTS_MAP.yml").exists():
+                requirements_file = self.feature_0_dir / "REQUIREMENTS_MAP.yml"
+            elif self.feature_0_dir and (self.feature_0_dir / "data" / "REQUIREMENTS_MAP.yml").exists():
+                requirements_file = self.feature_0_dir / "data" / "REQUIREMENTS_MAP.yml"
+            elif self.base_0_dir and (self.base_0_dir / "REQUIREMENTS_MAP.yml").exists():
+                requirements_file = self.base_0_dir / "REQUIREMENTS_MAP.yml"
+            elif self.base_1_dir and (self.base_1_dir / "REQUIREMENTS_MAP.yml").exists():
+                requirements_file = self.base_1_dir / "REQUIREMENTS_MAP.yml"
+            elif self.base_0_dir and (self.base_0_dir / "data" / "REQUIREMENTS_MAP.yml").exists():
+                requirements_file = self.base_0_dir / "data" / "REQUIREMENTS_MAP.yml"
+            elif self.base_1_dir and (self.base_1_dir / "data" / "REQUIREMENTS_MAP.yml").exists():
+                requirements_file = self.base_1_dir / "data" / "REQUIREMENTS_MAP.yml"
+            # Fallback to work directory
+            elif (self.work_dir / "REQUIREMENTS_MAP.yml").exists():
+                requirements_file = self.work_dir / "REQUIREMENTS_MAP.yml"
+            elif (self.work_dir.parent / "REQUIREMENTS_MAP.yml").exists():
+                requirements_file = self.work_dir.parent / "REQUIREMENTS_MAP.yml"
+            
+            if not requirements_file or not requirements_file.exists():
                 print(f"⚠️  Requirements file not found at {requirements_file}")
                 print(f"   Falling back to original behavior for {target_file}")
                 
@@ -476,8 +498,9 @@ class DiffPatchManager:
             print(f"📋 Using requirements file: {requirements_file}")
             
             # Resolve the conflict using AI
+            # Note: orig_file is the backup (.orig), but we want to resolve conflicts in the target_file
             resolution_result = resolve_file_conflict_with_openai(
-                original_file_path=orig_file,
+                original_file_path=target_file,
                 rejection_file_path=rej_file,
                 requirements_file=requirements_file,
                 verbose=True

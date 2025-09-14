@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 import asyncio
 from .diff_patch import DiffPatchManager
+from .github_operations import GitHubOperations
 
 
 class AutoRebase:
@@ -36,7 +37,7 @@ class AutoRebase:
     
     async def clone_repository(self, repo_url: str, target_dir: Path, sha: str) -> Dict[str, Any]:
         """
-        Clone a repository and checkout specific SHA
+        Clone a repository and checkout specific SHA, always fetching latest changes
         
         Args:
             repo_url: GitHub repository URL
@@ -55,6 +56,16 @@ class AutoRebase:
             clone_cmd = ["git", "clone", repo_url, str(target_dir)]
             result = subprocess.run(
                 clone_cmd,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            
+            # Always fetch latest changes to ensure we have the most recent commits
+            fetch_cmd = ["git", "fetch", "origin"]
+            result = subprocess.run(
+                fetch_cmd,
+                cwd=target_dir,
                 capture_output=True,
                 text=True,
                 check=True
@@ -259,5 +270,56 @@ class AutoRebase:
             return {
                 "success": False,
                 "message": f"Process failed: {str(e)}",
+                "error": str(e)
+            }
+    
+    async def create_feature_pr(
+        self, 
+        feature_repo_url: str,
+        base_branch: str = "feature/v5.0.0",
+        new_branch: str = "feature/v5.0.1"
+    ) -> Dict[str, Any]:
+        """
+        Create a new feature branch with resolved changes and create a PR
+        
+        Args:
+            feature_repo_url: URL of the feature repository
+            base_branch: Base branch to create PR against (default: feature/v5.0.0)
+            new_branch: New branch name (default: feature/v5.0.1)
+            
+        Returns:
+            Dict with PR creation results
+        """
+        try:
+            print(f"🚀 Creating feature PR: {new_branch} -> {base_branch}")
+            
+            # Initialize GitHub operations
+            github_ops = GitHubOperations(self.work_dir)
+            
+            # Get the feature-5.1 directory path
+            feature_51_dir = self.base_1_dir.parent / "feature-5.1"
+            
+            if not feature_51_dir.exists():
+                return {
+                    "success": False,
+                    "message": f"Feature-5.1 directory not found: {feature_51_dir}",
+                    "error": "Run autorebase first to generate resolved files"
+                }
+            
+            # Create the PR
+            pr_result = github_ops.create_feature_branch_and_pr(
+                feature_repo_url=feature_repo_url,
+                feature_0_dir=self.feature_0_dir,
+                feature_51_dir=feature_51_dir,
+                base_branch=base_branch,
+                new_branch=new_branch
+            )
+            
+            return pr_result
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"Error creating feature PR: {str(e)}",
                 "error": str(e)
             }

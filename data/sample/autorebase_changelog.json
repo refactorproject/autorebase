@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-09-14T11:17:48.454919",
+  "timestamp": "2025-09-14T11:46:44.113691",
   "files_processed": [
     "configs/config.json",
     "configs/settings.yaml",
@@ -20,13 +20,13 @@
       "file": "configs/config.json",
       "patch_type": "b0_to_f0",
       "step": "step1",
-      "timestamp": "2025-09-14T11:17:48.534133"
+      "timestamp": "2025-09-14T11:46:44.474534"
     },
     {
       "file": "configs/settings.yaml",
       "patch_type": "b0_to_f0",
       "step": "step1",
-      "timestamp": "2025-09-14T11:17:48.544443"
+      "timestamp": "2025-09-14T11:46:44.487747"
     }
   ],
   "f1_files_created": [
@@ -34,13 +34,13 @@
       "file": "data/sample/feature-5.1/configs/config.json",
       "source_file": "data/sample/base-1.1/configs/config.json",
       "patch_type": "b0_to_f0",
-      "timestamp": "2025-09-14T11:17:48.534176"
+      "timestamp": "2025-09-14T11:46:44.474571"
     },
     {
       "file": "data/sample/feature-5.1/configs/settings.yaml",
       "source_file": "data/sample/base-1.1/configs/settings.yaml",
       "patch_type": "b0_to_f0",
-      "timestamp": "2025-09-14T11:17:48.544492"
+      "timestamp": "2025-09-14T11:46:44.487784"
     }
   ],
   "backup_files": [
@@ -48,13 +48,13 @@
       "file": "data/sample/feature-5.1/dts/device.dtsi.orig",
       "original_file": "data/sample/feature-5.1/dts/device.dtsi",
       "patch_name": "step1_dts_device.dtsi",
-      "timestamp": "2025-09-14T11:17:48.552490"
+      "timestamp": "2025-09-14T11:46:44.493586"
     },
     {
       "file": "data/sample/feature-5.1/src/main.cpp.orig",
       "original_file": "data/sample/feature-5.1/src/main.cpp",
       "patch_name": "step1_src_main.cpp",
-      "timestamp": "2025-09-14T11:17:48.584920"
+      "timestamp": "2025-09-14T11:46:44.529403"
     }
   ],
   "reject_files": [
@@ -62,13 +62,13 @@
       "file": "data/sample/feature-5.1/dts/device.dtsi.rej",
       "original_file": "data/sample/feature-5.1/dts/device.dtsi",
       "patch_name": "step1_dts_device.dtsi",
-      "timestamp": "2025-09-14T11:17:48.552523"
+      "timestamp": "2025-09-14T11:46:44.493621"
     },
     {
       "file": "data/sample/feature-5.1/src/main.cpp.rej",
       "original_file": "data/sample/feature-5.1/src/main.cpp",
       "patch_name": "step1_src_main.cpp",
-      "timestamp": "2025-09-14T11:17:48.585013"
+      "timestamp": "2025-09-14T11:46:44.529440"
     }
   ],
   "three_way_merges": [
@@ -77,7 +77,7 @@
       "orig_file": "data/sample/feature-5.1/dts/device.dtsi.orig",
       "rej_file": "data/sample/feature-5.1/dts/device.dtsi.rej",
       "patch_name": "step1_dts_device.dtsi",
-      "timestamp": "2025-09-14T11:17:48.573022",
+      "timestamp": "2025-09-14T11:46:44.522473",
       "status": "fallback_ai_failed",
       "error": "No requirement found for file: data/sample/feature-5.1/dts/device.dtsi.orig",
       "conflict_type": "no_requirement"
@@ -87,7 +87,7 @@
       "orig_file": "data/sample/feature-5.1/src/main.cpp.orig",
       "rej_file": "data/sample/feature-5.1/src/main.cpp.rej",
       "patch_name": "step1_src_main.cpp",
-      "timestamp": "2025-09-14T11:17:51.292767",
+      "timestamp": "2025-09-14T11:46:46.480548",
       "status": "success",
       "conflict_type": "api_change",
       "changes_applied": [
