@@ -7,7 +7,11 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
+    "start:http": "MCP_TRANSPORT=http node dist/index.js",
+    "start:http:dev": "MCP_TRANSPORT=http tsx src/index.ts",
     "dev": "tsx src/index.ts",
+    "dev:http": "MCP_TRANSPORT=http tsx src/index.ts",
+    "test:http": "node test-http.js",
     "clean": "rm -rf dist"
   },
   "keywords": [

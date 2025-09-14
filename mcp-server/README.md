@@ -1,212 +1,189 @@
 # AutoRebase MCP Server
 
-A Model Context Protocol (MCP) server that provides AI-powered conflict resolution for Git repositories through the AutoRebase system.
+MCP server for AutoRebase with AI conflict resolution on public GitHub repositories.
 
-## 🚀 Features
+## Features
 
-- **Complete AutoRebase Process**: Clone repositories, generate patches, resolve conflicts
-- **AI-Powered Conflict Resolution**: Uses OpenAI to intelligently resolve merge conflicts
-- **Requirements-Based Resolution**: Respects REQUIREMENTS_MAP.yml for conflict resolution
-- **Automatic Changelog**: Returns complete changelog information with every autorebase operation
-- **Local Authentication**: Uses your local Git credentials (SSH keys or GitHub tokens)
-- **Public Repository Support**: Works with public GitHub repositories
+- **AutoRebase Processing**: Clone repositories, generate patches, apply changes
+- **AI Conflict Resolution**: Resolve merge conflicts using AI
+- **GitHub Operations**: Create branches, push changes, generate PRs
+- **Flexible Transport**: Support for both stdio and HTTP transport modes
 
-## 🛠️ Available Tools
+## Installation
 
-### 1. `autorebase`
-
-Runs the complete AutoRebase process with AI conflict resolution and automatically includes changelog information.
-
-**Parameters:**
-- `base_software_0` (required): Base software 0 SHA or tag
-- `base_software_1` (required): Base software 1 SHA or tag  
-- `feature_software_0` (required): Feature software 0 SHA or tag
-- `base_repo_url` (required): Base repository URL
-- `feature_repo_url` (required): Feature repository URL
-- `base_branch` (optional): Target branch for PR creation (default: "feature/v5.0.0")
-- `output_branch` (optional): New branch to create (default: "feature/v5.0.1")
-- `github_token` (optional): GitHub personal access token for authentication
-- `use_ssh` (optional): Use SSH authentication instead of token (default: false)
-
-**Response includes:**
-- Resolved files with conflict resolution details
-- Complete changelog with processing history
-- AI resolution statistics and validation scores
-- Patch application success/failure details
-
-**Example:**
-```json
-{
-  "name": "autorebase",
-  "arguments": {
-    "base_software_0": "main",
-    "base_software_1": "main",
-    "feature_software_0": "main",
-    "base_repo_url": "https://github.com/apurva/sample-base-sw.git",
-    "feature_repo_url": "https://github.com/apurva/sample-feature-sw.git",
-    "use_ssh": true
-  }
-}
+```bash
+npm install
+npm run build
 ```
 
-### 2. `validate_repository`
+## Usage
 
-Validates a GitHub repository and SHA/tag combination.
+### Stdio Transport (Default)
 
-**Parameters:**
-- `repo_url` (required): Repository URL to validate
-- `sha_or_tag` (required): SHA or tag to validate
-
-**Example:**
-```json
-{
-  "name": "validate_repository",
-  "arguments": {
-    "repo_url": "https://github.com/apurva/sample-base-sw.git",
-    "sha_or_tag": "main"
-  }
-}
-```
-
-## 🔧 Installation
-
-1. **Install Dependencies:**
-   ```bash
-   cd mcp-server
-   npm install
-   ```
-
-2. **Build the Server:**
-   ```bash
-   npm run build
-   ```
-
-3. **Set Environment Variables:**
-   
-   **Option A: Using .env file (Recommended):**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your actual API keys
-   ```
-   
-   **Option B: Using environment variables:**
-   ```bash
-   export OPENAI_API_KEY="your-openai-api-key"
-   export GITHUB_TOKEN="your-github-token"  # Optional, for GitHub operations
-   export SSH_OVERRIDE="true"  # Optional, to force SSH authentication
-   export DEBUG="true"  # Optional, for verbose logging
-   ```
-
-## 🚀 Usage
-
-### Running the Server
+The server runs on stdio by default, suitable for MCP client integration:
 
 ```bash
 npm start
-```
-
-### Development Mode
-
-```bash
+# or
 npm run dev
 ```
 
-### Testing the Server
+### HTTP Transport
+
+Run the server as an HTTP service with configurable port:
 
 ```bash
-# Test with a simple autorebase operation
-echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "autorebase", "arguments": {"base_software_0": "main", "base_software_1": "main", "feature_software_0": "main", "base_repo_url": "https://github.com/apurva/sample-base-sw.git", "feature_repo_url": "https://github.com/apurva/sample-feature-sw.git", "use_ssh": true}}}' | node dist/index.js
+# Production
+MCP_TRANSPORT=http MCP_PORT=3000 npm start
+
+# Development
+MCP_TRANSPORT=http MCP_PORT=3000 npm run dev
+
+# Using npm scripts
+npm run start:http
+npm run dev:http
 ```
 
-## 🔗 Integration with Cursor AI
+#### Environment Variables
 
-### Setup for Cursor
+- `MCP_TRANSPORT`: Transport mode (`stdio` or `http`, default: `stdio`)
+- `MCP_PORT`: HTTP port number (default: `3000`)
 
-1. **Copy the MCP configuration:**
-   ```bash
-   cp mcp-server/cursor-mcp-config.json ~/.cursor/mcp.json
-   ```
+#### HTTP Endpoints
 
-2. **Update the configuration** with your actual paths and environment variables
+When running in HTTP mode, the server provides:
 
-3. **Restart Cursor**
+- **SSE Endpoint**: `http://localhost:3000/message` - Server-Sent Events for MCP communication
+- **Health Check**: `http://localhost:3000/health` - Server health status
 
-4. **Use AI to call AutoRebase tools:**
-   - Ask Cursor to "run autorebase on repositories X and Y"
-   - Cursor will automatically call the MCP tools
-   - Review the results including changelog information
+### Example HTTP Usage
 
-See `CURSOR_SETUP.md` for detailed Cursor integration instructions.
+```bash
+# Start server on port 3000
+MCP_TRANSPORT=http MCP_PORT=3000 npm start
 
-## 📋 Requirements
+# Start server on custom port
+MCP_TRANSPORT=http MCP_PORT=8080 npm start
+```
 
-- **Node.js**: >= 18.0.0
-- **Python**: >= 3.8 (for AutoRebase functionality)
-- **OpenAI API Key**: Required for AI conflict resolution
-- **Git**: Required for repository operations
-- **Local Git Credentials**: SSH keys or GitHub token for repository access
+## Available Tools
 
-## 🔒 Security & Authentication
+### `autorebase`
+Run complete AutoRebase process with AI conflict resolution.
 
-- **Local Processing**: All operations happen on your machine
-- **SSH Authentication**: Uses your local SSH keys for GitHub operations
-- **GitHub Token**: Optional personal access token for enhanced access
-- **No Data Storage**: No sensitive data is stored or transmitted
-- **Secure API Keys**: OpenAI API key handled via environment variables
-- **Public Repository Focus**: Designed for open-source workflows
+**Parameters:**
+- `base_repo_url`: Base repository URL
+- `feature_repo_url`: Feature repository URL  
+- `base_software_0`: Base software version 0 (SHA/tag)
+- `base_software_1`: Base software version 1 (SHA/tag)
+- `feature_software_0`: Feature software version 0 (SHA/tag)
+- `base_branch`: Base branch name (optional)
+- `output_branch`: New branch name (optional)
+- `github_token`: GitHub token (optional)
+- `use_ssh`: Use SSH authentication (optional)
 
-## 🐛 Troubleshooting
+### `validate_repository`
+Validate repository and SHA/tag combination.
+
+**Parameters:**
+- `repo_url`: Repository URL
+- `sha_or_tag`: SHA or tag to validate
+
+## Configuration
+
+The server uses environment variables for configuration:
+
+```bash
+# GitHub authentication
+export GITHUB_TOKEN="your_github_token"
+
+# OpenAI API key for AI conflict resolution
+export OPENAI_API_KEY="your_openai_api_key"
+
+# Transport configuration
+export MCP_TRANSPORT="http"  # or "stdio"
+export MCP_PORT="3000"
+```
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Build TypeScript
+npm run build
+
+# Run in development mode
+npm run dev
+
+# Run in HTTP development mode
+npm run dev:http
+
+# Clean build artifacts
+npm run clean
+```
+
+## Integration with MCP Clients
+
+### Stdio Mode
+Configure your MCP client to use stdio transport:
+
+```json
+{
+  "mcpServers": {
+    "autorebase": {
+      "command": "node",
+      "args": ["/path/to/autorebase/mcp-server/dist/index.js"],
+      "env": {
+        "GITHUB_TOKEN": "your_token",
+        "OPENAI_API_KEY": "your_key"
+      }
+    }
+  }
+}
+```
+
+### HTTP Mode
+Configure your MCP client to use HTTP transport:
+
+```json
+{
+  "mcpServers": {
+    "autorebase": {
+      "command": "node",
+      "args": ["/path/to/autorebase/mcp-server/dist/index.js"],
+      "env": {
+        "MCP_TRANSPORT": "http",
+        "MCP_PORT": "3000",
+        "GITHUB_TOKEN": "your_token",
+        "OPENAI_API_KEY": "your_key"
+      }
+    }
+  }
+}
+```
+
+## Troubleshooting
 
 ### Common Issues
 
-1. **Python Import Errors**: Ensure you're running from the correct directory
-2. **OpenAI API Errors**: Check your API key and quota
-3. **Repository Access**: Ensure repositories are public and accessible
-4. **Git Operations**: Ensure Git is installed and accessible
-5. **Authentication Issues**: Check your SSH keys or GitHub token
+1. **Port already in use**: Change the `MCP_PORT` environment variable
+2. **Authentication errors**: Verify `GITHUB_TOKEN` is valid and has necessary permissions
+3. **AI resolution failures**: Check `OPENAI_API_KEY` is valid and has sufficient credits
 
-### Debug Mode
+### Logs
 
-Set `DEBUG=true` environment variable for verbose logging.
-
-### Testing Authentication
+The server logs to stderr, so you can redirect logs:
 
 ```bash
-# Test SSH access to GitHub
-ssh -T git@github.com
+# Stdio mode
+node dist/index.js 2> server.log
 
-# Test GitHub token (if using)
-curl -H "Authorization: token YOUR_TOKEN" https://api.github.com/user
+# HTTP mode  
+MCP_TRANSPORT=http node dist/index.js 2> server.log
 ```
 
-## 📝 Example Workflow
+## License
 
-1. **Validate Input**: Use `validate_repository` to check repositories and SHAs
-2. **Run AutoRebase**: Use `autorebase` to process the repositories
-3. **Review Results**: Examine resolved files, conflict resolution details, and complete changelog
-4. **Manual PR Creation**: Create pull requests manually using the resolved files
-
-## 🎯 What You Get
-
-Every autorebase operation returns:
-- **Resolved Files**: Complete file contents with conflict resolution details
-- **Changelog**: Detailed processing history including:
-  - Files processed and patches generated
-  - Successful and failed patch applications
-  - AI resolution statistics and validation scores
-  - Backup files and reject files created
-  - Three-way merge operations performed
-- **Processing Details**: Clone results and autorebase statistics
-- **File Locations**: Paths to saved changelog and resolved files
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## 📄 License
-
-MIT License - see LICENSE file for details.
+MIT
