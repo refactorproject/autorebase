@@ -25,6 +25,7 @@ Runs the complete AutoRebase process with AI conflict resolution.
 - `base_branch` (optional): Target branch for PR creation (default: "feature/v5.0.0")
 - `output_branch` (optional): New branch to create (default: "feature/v5.0.1")
 - `github_token` (optional): GitHub personal access token for authentication
+- `use_ssh` (optional): Use SSH authentication instead of token
 
 **Example:**
 ```json
@@ -77,13 +78,17 @@ Validates a GitHub repository and SHA/tag combination.
    **Option A: Using .env file (Recommended):**
    ```bash
    cp .env.example .env
-   # Edit .env with your actual API keys
+   # Edit .env with your actual API keys and WorkOS credentials
    ```
    
    **Option B: Using environment variables:**
    ```bash
    export OPENAI_API_KEY="your-openai-api-key"
-   export GITHUB_TOKEN="your-github-token"  # Optional, for authentication
+   export WORKOS_CLIENT_ID="client_01H1234567890abcdef"
+   export WORKOS_CLIENT_SECRET="sk_test_1234567890abcdef"
+   export REDIRECT_URI="http://localhost:8788/callback"
+   export GITHUB_TOKEN="your-github-token"  # Optional, fallback authentication
+   export SSH_OVERRIDE="true"  # Optional, to force SSH authentication
    ```
 
 ## 🚀 Usage
@@ -118,9 +123,12 @@ This MCP server can be integrated with AI models that support the Model Context 
 
 ## 🔒 Security
 
-- **Flexible Authentication**: Supports GitHub tokens or local credentials
-- **Public Repository Support**: Works with public repositories without authentication
-- **Secure Token Handling**: GitHub tokens handled via environment variables or parameters
+- **WorkOS AuthKit Integration**: Secure user authentication with GitHub OAuth
+- **User-Based Access Control**: Each user authenticates with their own GitHub account
+- **Session Management**: Secure session handling with automatic token management
+- **Permission-Based Tools**: Tools gated behind user permissions
+- **Flexible Authentication**: Supports WorkOS AuthKit, direct tokens, SSH keys, or local credentials
+- **Secure Token Handling**: GitHub tokens handled via WorkOS or environment variables
 - **Local Processing**: All operations happen locally
 - **Secure API Keys**: OpenAI API key handled via environment variables
 

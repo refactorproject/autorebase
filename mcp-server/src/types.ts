@@ -9,7 +9,8 @@ export const AutoRebaseRequestSchema = z.object({
   feature_repo_url: z.string().url().describe('Feature repository URL (used for feature_software_0)'),
   base_branch: z.string().optional().default('feature/v5.0.0').describe('Target branch for PR creation'),
   output_branch: z.string().optional().default('feature/v5.0.1').describe('New branch to create'),
-  github_token: z.string().optional().describe('GitHub personal access token for authentication (optional, can also use GITHUB_TOKEN env var)')
+  github_token: z.string().optional().describe('GitHub personal access token for authentication (optional, can also use GITHUB_TOKEN env var)'),
+  use_ssh: z.boolean().optional().default(false).describe('Use SSH authentication instead of token (optional, can also use SSH_OVERRIDE=true env var)')
 });
 
 export type AutoRebaseRequest = z.infer<typeof AutoRebaseRequestSchema>;

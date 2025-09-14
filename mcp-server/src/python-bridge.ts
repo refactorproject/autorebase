@@ -48,11 +48,24 @@ async def main():
         
         # Set GitHub token if provided
         github_token = request_data.get('github_token') or os.environ.get('GITHUB_TOKEN')
-        if github_token:
+        use_ssh = request_data.get('use_ssh', False)
+        
+        if use_ssh:
+            os.environ['SSH_OVERRIDE'] = 'true'
+            print("Using SSH authentication", file=sys.stderr)
+        elif github_token:
             os.environ['GITHUB_TOKEN'] = github_token
             print(f"Using GitHub token: {github_token[:8]}...", file=sys.stderr)
         else:
-            print("No GitHub token provided, using local credentials", file=sys.stderr)
+            print("No authentication provided, using local credentials", file=sys.stderr)
+        
+        # Redirect stdout to stderr to prevent debug output from breaking JSON parsing
+        import contextlib
+        from io import StringIO
+        
+        # Capture stdout and redirect to stderr
+        original_stdout = sys.stdout
+        sys.stdout = sys.stderr
         
         # Process the autorebase
         result = await service.process_autorebase(autorebase_request)
@@ -73,8 +86,10 @@ async def main():
             "autorebase_results": getattr(result, 'autorebase_results', None).dict() if getattr(result, 'autorebase_results', None) and hasattr(getattr(result, 'autorebase_results', None), 'dict') else getattr(result, 'autorebase_results', None)
         }
         
+        # Restore stdout and print final JSON result
+        sys.stdout = original_stdout
         print(json.dumps(result_dict))
-        
+
     except Exception as e:
         error_result = {
             "success": False,
