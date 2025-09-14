@@ -1,5 +1,0 @@
-feature:
-  enabled: true
-  mode: experimental
-  default_y: true
-
