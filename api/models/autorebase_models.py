@@ -91,4 +91,12 @@ class AutoRebaseResponse(BaseModel):
         default=None,
         description="List of resolved files with their content and conflict resolution details"
     )
+    changelog: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Complete changelog information from the autorebase process"
+    )
+    changelog_path: Optional[str] = Field(
+        default=None,
+        description="Path to the saved changelog file"
+    )
     error: Optional[str] = Field(description="Error message if operation failed")

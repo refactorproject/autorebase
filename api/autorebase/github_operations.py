@@ -16,14 +16,28 @@ class GitHubOperations:
         self.work_dir = work_dir
     
     def _get_authenticated_url(self, repo_url: str) -> str:
-        """Get authenticated repository URL if GitHub token is available"""
+        """Get authenticated repository URL using token or SSH"""
         github_token = os.environ.get('GITHUB_TOKEN')
+        
+        # Check if SSH is preferred (no token or SSH_OVERRIDE env var)
+        ssh_override = os.environ.get('SSH_OVERRIDE', 'false').lower() == 'true'
+        
+        if ssh_override or not github_token:
+            # Convert HTTPS URL to SSH URL for authentication
+            if repo_url.startswith('https://github.com/'):
+                return repo_url.replace('https://github.com/', 'git@github.com:')
+            elif repo_url.startswith('https://'):
+                # Generic HTTPS to SSH conversion
+                return repo_url.replace('https://', 'git@').replace('/', ':')
+        
+        # Use token authentication
         if github_token and 'github.com' in repo_url:
             # Replace https:// with https://token@ for authentication
             if repo_url.startswith('https://github.com/'):
                 return repo_url.replace('https://github.com/', f'https://{github_token}@github.com/')
             elif repo_url.startswith('https://'):
                 return repo_url.replace('https://', f'https://{github_token}@')
+        
         return repo_url
     
     def create_feature_branch_and_pr(

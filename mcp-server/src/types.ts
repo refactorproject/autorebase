@@ -30,6 +30,17 @@ export const AutoRebaseResponseSchema = z.object({
     conflict_resolved: z.boolean().describe('Whether this file had conflicts that were resolved'),
     ai_resolution_used: z.boolean().describe('Whether AI was used to resolve conflicts')
   })).optional().describe('Resolved files with their content'),
+  changelog: z.object({
+    timestamp: z.string().describe('Timestamp of the autorebase process'),
+    files_processed: z.array(z.string()).describe('List of files that were processed'),
+    patches_generated: z.array(z.any()).describe('List of patches that were generated'),
+    patches_applied: z.array(z.any()).describe('List of patches that were successfully applied'),
+    f1_files_created: z.array(z.string()).describe('List of f1 files that were created'),
+    backup_files: z.array(z.string()).describe('List of backup files created'),
+    reject_files: z.array(z.string()).describe('List of reject files created'),
+    three_way_merges: z.array(z.any()).describe('List of three-way merge operations performed')
+  }).optional().describe('Complete changelog information from the autorebase process'),
+  changelog_path: z.string().optional().describe('Path to the saved changelog file'),
   processing_details: z.object({
     clone_results: z.object({
       success: z.boolean(),

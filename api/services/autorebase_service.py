@@ -53,7 +53,15 @@ class AutoRebaseService:
             if "clone_results" in results:
                 clone_results = {}
                 for key, result in results["clone_results"]["results"].items():
-                    clone_results[key] = CloneResult(**result)
+                    # Ensure all required fields are present
+                    clone_data = {
+                        "success": result.get("success", False),
+                        "message": result.get("message", ""),
+                        "directory": result.get("directory"),
+                        "sha": result.get("sha"),
+                        "error": result.get("error")
+                    }
+                    clone_results[key] = CloneResult(**clone_data)
             
             autorebase_results = None
             if "autorebase_results" in results:
@@ -64,6 +72,13 @@ class AutoRebaseService:
                 if autorebase_results.details is None:
                     autorebase_results.details = {}
                 autorebase_results.details["pr_results"] = pr_results
+            
+            # Extract changelog information
+            changelog = None
+            changelog_path = None
+            if autorebase_results and autorebase_results.details:
+                changelog = autorebase_results.details.get("changelog")
+                changelog_path = autorebase_results.details.get("changelog_path")
             
             return AutoRebaseResponse(
                 success=results["success"],
@@ -76,6 +91,8 @@ class AutoRebaseService:
                 work_dir=request.work_dir,
                 clone_results=clone_results,
                 autorebase_results=autorebase_results,
+                changelog=changelog,
+                changelog_path=changelog_path,
                 error=results.get("error")
             )
             
