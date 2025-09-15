@@ -63,30 +63,37 @@ async def main():
         service = AutoRebaseService()
         
         # Handle authentication - check for dynamic token generation first
-        github_token = request_data.get('github_token') or os.environ.get('GITHUB_TOKEN')
         use_ssh = request_data.get('use_ssh', False)
         
-        # Check if we need to generate a token dynamically
-        if not github_token and not use_ssh:
-            organization_name = request_data.get('organization_name')
-            repository_name = request_data.get('repository_name')
-            internal_api_key = request_data.get('internal_api_key')
+        # Check if we need to generate a token dynamically (prioritize dynamic token generation)
+        organization_name = request_data.get('organization_name')
+        repository_name = request_data.get('repository_name')
+        internal_api_key = request_data.get('internal_api_key')
+        
+        github_token = None
+        if organization_name and repository_name and internal_api_key and not use_ssh:
+            # Generate dynamic token
             token_api_url = request_data.get('token_api_url', 'https://refactor.liftgate.io/api/github/tokens')
-            
-            if organization_name and repository_name and internal_api_key:
-                try:
-                    github_token = generate_github_token(organization_name, repository_name, internal_api_key, token_api_url)
-                    if github_token:
-                        print(f"Generated GitHub token successfully", file=sys.stderr)
-                    else:
-                        print("Warning: Token generation returned empty token", file=sys.stderr)
-                except Exception as e:
-                    print(f"Warning: Failed to generate token: {str(e)}", file=sys.stderr)
+            try:
+                github_token = generate_github_token(organization_name, repository_name, internal_api_key, token_api_url)
+                print(f"Debug: Generated dynamic token: {github_token[:10]}..." if github_token else "Debug: No dynamic token generated", file=sys.stderr)
+                if github_token:
+                    print(f"Generated GitHub token successfully", file=sys.stderr)
+                else:
+                    print("Warning: Token generation returned empty token", file=sys.stderr)
+            except Exception as e:
+                print(f"Warning: Failed to generate token: {str(e)}", file=sys.stderr)
+        
+        # Fallback to existing token if dynamic generation failed
+        if not github_token:
+            github_token = request_data.get('github_token') or os.environ.get('GITHUB_TOKEN')
+            print(f"Debug: Using fallback token: {github_token[:10]}..." if github_token else "Debug: No fallback token", file=sys.stderr)
         
         if use_ssh:
             os.environ['SSH_OVERRIDE'] = 'true'
         elif github_token:
             os.environ['GITHUB_TOKEN'] = github_token
+            print(f"Set GITHUB_TOKEN environment variable", file=sys.stderr)
         
         # Redirect stdout to stderr to prevent debug output from breaking JSON parsing
         import contextlib

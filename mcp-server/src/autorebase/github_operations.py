@@ -32,11 +32,11 @@ class GitHubOperations:
         
         # Use token authentication
         if github_token and 'github.com' in repo_url:
-            # Replace https:// with https://token@ for authentication
+            # Replace https:// with https://x-access-token:token@ for authentication
             if repo_url.startswith('https://github.com/'):
-                return repo_url.replace('https://github.com/', f'https://{github_token}@github.com/')
+                return repo_url.replace('https://github.com/', f'https://x-access-token:{github_token}@github.com/')
             elif repo_url.startswith('https://'):
-                return repo_url.replace('https://', f'https://{github_token}@')
+                return repo_url.replace('https://', f'https://x-access-token:{github_token}@')
         
         return repo_url
     
